@@ -37,15 +37,16 @@
   --on-btn:#221720; color-scheme:dark;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*,*::before,*::after{box-sizing:inherit}
+*,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
-main{max-width:600px;margin:0 auto;padding:22px 20px 56px}
+main{max-width:600px;margin:0 auto;padding:22px 20px 96px;overflow-wrap:break-word}
 a{color:var(--rose-ink);text-underline-offset:3px}
 h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.3;margin:0}
 h1{font-size:26px;letter-spacing:-0.01em}
 h2{font-size:20px}
 p{margin:0 0 8px}
 .sub{color:var(--ink-2);margin:4px 0 10px}
+.syncline span{overflow-wrap:anywhere}
 .syncline{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:13px;color:var(--ink-2);margin:0 0 20px;min-height:1.6em}
 .fine{font-size:13px;color:var(--ink-2);margin:4px 0}
 section{margin:0 0 32px}
@@ -56,7 +57,7 @@ section{margin:0 0 32px}
 .flash{min-height:0;margin:0 0 10px;font-size:14px;color:var(--rose-ink)}
 .flash:empty{display:none}
 .now-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:10px}
-.now-no{font-family:var(--serif);font-weight:700;font-size:44px;line-height:1;color:var(--rose-ink);min-width:1.6em;font-variant-numeric:tabular-nums}
+.now-no{font-family:var(--serif);font-weight:700;font-size:44px;line-height:1;color:var(--rose-ink);min-width:1.2em;font-variant-numeric:tabular-nums}
 .now-title{font-size:21px}
 .now-meta{font-size:14px;color:var(--ink-2);margin:2px 0 0}
 .res{margin:0 0 4px;font-size:15px}
@@ -83,7 +84,7 @@ section{margin:0 0 32px}
 .inline{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
 .inline .field{flex:1;min-width:140px}
 .copyrow{display:flex;gap:8px;margin-top:8px}
-.copyrow input,.copyrow textarea{flex:1;font:inherit;font-size:14px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.copyrow input,.copyrow textarea{flex:1;min-width:0;font:inherit;font-size:14px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 
 /* the decade grid */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:5px;margin-top:12px}
@@ -359,7 +360,7 @@ function stw(id){if(!S.courses[id])S.courses[id]={st:'todo',done:0};return S.cou
 function cv(c){
   const o=(S.ov&&S.ov[c.id])||{};const r=Object.assign({},c);
   ['r','u','q','k','kl','ex','note','p','kv'].forEach(key=>{if(o[key]!==undefined&&o[key]!==null)r[key]=o[key];});
-  if(o.r&&typeof r.note==='string')r.note=r.note.replace(/^자료 확정 필요\.\s*/,'');
+  if(typeof r.note==='string')r.note=r.note.replace(/^자료 확정 필요\.\s*/,'');
   return r;
 }
 function units(c){const s=st(c.id);if(typeof s.k==='number'&&s.k>0)return s.k;const b=cv(c);return (typeof b.k==='number'&&b.k>0)?b.k:null;}
