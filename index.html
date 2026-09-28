@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>10년 공부 기록</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FDE7EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#33222D" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Hahmlet:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FFF5F8; --slip:#FDE7EE; --ink:#3B2330; --ink-2:#7A5867;
+  --rose:#F3B4C7; --rose-ink:#A63F69; --line:#EDC7D4; --fill:#D9789F; --on-fill:#2B1621;
+  --on-btn:#FFF5F8;
+  --serif:"Hahmlet","Noto Serif KR","AppleMyungjo","Batang",serif;
+  --sans:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#221720; --slip:#33222D; --ink:#F7E7EE; --ink-2:#C9A9B8;
+    --rose:#7B4560; --rose-ink:#F2A6C2; --line:#4A3040; --fill:#D9789F; --on-fill:#2B1621;
+    --on-btn:#221720; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#221720; --slip:#33222D; --ink:#F7E7EE; --ink-2:#C9A9B8;
+  --rose:#7B4560; --rose-ink:#F2A6C2; --line:#4A3040; --fill:#D9789F; --on-fill:#2B1621;
+  --on-btn:#221720; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+main{max-width:600px;margin:0 auto;padding:22px 20px 56px}
+a{color:var(--rose-ink);text-underline-offset:3px}
+h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.3;margin:0}
+h1{font-size:26px;letter-spacing:-0.01em}
+h2{font-size:20px}
+p{margin:0 0 8px}
+.sub{color:var(--ink-2);margin:4px 0 20px}
+.fine{font-size:13px;color:var(--ink-2);margin:4px 0}
+section{margin:0 0 32px}
+:focus-visible{outline:2px solid var(--rose-ink);outline-offset:2px}
+
+/* this-week slip */
+.slip{background:var(--slip);border-radius:16px;padding:18px 18px 16px}
+.flash{min-height:0;margin:0 0 10px;font-size:14px;color:var(--rose-ink)}
+.flash:empty{display:none}
+.now-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:10px}
+.now-no{font-family:var(--serif);font-weight:700;font-size:44px;line-height:1;color:var(--rose-ink);min-width:1.6em;font-variant-numeric:tabular-nums}
+.now-title{font-size:21px}
+.now-meta{font-size:14px;color:var(--ink-2);margin:2px 0 0}
+.res{margin:0 0 4px;font-size:15px}
+.week-h{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.week-h h3{font-size:17px}
+.week-h span{font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.slots{list-style:none;margin:8px 0 0;padding:0}
+.slot{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:11px 0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.slot:last-child{border-bottom:0}
+.tick{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--rose-ink);display:grid;place-items:center;transition:background .15s}
+.tick svg{width:14px;height:14px;opacity:0;transition:opacity .15s}
+.slot[aria-checked="true"] .tick{background:var(--rose-ink)}
+.slot[aria-checked="true"] .tick svg{opacity:1}
+.slot-l{flex:1;font-size:16px}
+.slot-p{font-size:13px;color:var(--ink-2);text-align:right;max-width:48%}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{font:inherit;font-size:15px;border-radius:10px;padding:10px 16px;cursor:pointer;border:1px solid transparent;background:var(--rose-ink);color:var(--on-btn)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.sm{font-size:14px;padding:7px 12px}
+.btn:disabled{opacity:.45;cursor:default}
+.field{display:block;margin:12px 0 0;font-size:15px}
+.field input,.field select,.field textarea{display:block;width:100%;margin-top:6px;font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+.field textarea{min-height:150px;resize:vertical;line-height:1.6}
+.inline{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.inline .field{flex:1;min-width:140px}
+.copyrow{display:flex;gap:8px;margin-top:8px}
+.copyrow input,.copyrow textarea{flex:1;font:inherit;font-size:14px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+
+/* the decade grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:5px;margin-top:12px}
+.cell{aspect-ratio:1;display:grid;place-items:center;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink);font-family:var(--serif);font-size:17px;font-weight:400;padding:0;cursor:pointer}
+.cell.mA{font-weight:700}
+.cell.mC{color:var(--ink-2)}
+.cell.is-done{background:var(--fill);border-color:var(--fill);color:var(--on-fill)}
+.cell.is-now{background:var(--rose);border:2px solid var(--rose-ink)}
+.cell.is-skip{color:var(--ink-2);background:repeating-linear-gradient(45deg,transparent 0 5px,var(--line) 5px 6px)}
+.cell.pop{animation:pop .6s ease-out}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:14px;border-radius:3px;border:1px solid var(--line);display:inline-block}
+.legend .l-done{background:var(--fill);border-color:var(--fill)}
+.legend .l-now{background:var(--rose);border:2px solid var(--rose-ink)}
+.legend .l-skip{background:repeating-linear-gradient(45deg,transparent 0 3px,var(--line) 3px 4px)}
+
+/* prose stats */
+.stats p{font-size:16px}
+
+/* fields */
+.frows{list-style:none;margin:10px 0 0;padding:0}
+.frow{display:flex;align-items:center;gap:12px;padding:8px 0}
+.cell.sm{width:30px;height:30px;font-size:15px;cursor:default;flex:none}
+.fmain{flex:1;min-width:0}
+.fname{margin:0 0 5px;font-size:15px}
+.fgoal{font-size:13px;color:var(--ink-2);margin-left:4px}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--fill);border-radius:3px}
+.fnum{font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums;min-width:3.2em;text-align:right}
+
+/* course list */
+.clist{margin-top:10px;border-top:1px solid var(--line)}
+.crow{border-bottom:1px solid var(--line)}
+.crow summary{list-style:none;display:flex;gap:12px;align-items:baseline;padding:11px 0;cursor:pointer}
+.crow summary::-webkit-details-marker{display:none}
+.cn{font-family:var(--serif);color:var(--ink-2);min-width:1.8em;font-variant-numeric:tabular-nums}
+.ct{flex:1;min-width:0}
+.ct b{font-weight:400;display:block}
+.ct small{font-size:13px;color:var(--ink-2)}
+.cs{font-size:13px;color:var(--ink-2);white-space:nowrap}
+.cs.done{color:var(--rose-ink)}
+.cs.now{color:var(--ink);font-weight:700}
+.cbody{padding:0 0 14px 2.6em}
+.kv{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0;font-size:14px}
+.kv input{width:5.5em;font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+
+/* rules & settings */
+details.fold{border-top:1px solid var(--line);padding-top:12px;margin-bottom:18px}
+details.fold>summary{cursor:pointer;list-style:none}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary h2{display:inline;font-size:18px}
+details.fold>summary::after{content:"열기";font-size:13px;color:var(--ink-2);margin-left:10px}
+details.fold[open]>summary::after{content:"닫기"}
+.rules{margin:12px 0 0;padding-left:1.3em}
+.rules li{margin-bottom:8px}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>10년 공부 기록</h1>
+    <p class="sub" id="subLine"></p>
+  </header>
+
+  <section class="slip" aria-labelledby="nowLabel">
+    <p id="flash" class="flash" role="status" aria-live="polite"></p>
+    <div id="now"></div>
+  </section>
+
+  <section aria-labelledby="mapH">
+    <h2 id="mapH"></h2>
+    <div id="grid" class="grid"></div>
+    <div class="legend" aria-hidden="true">
+      <span><i class="l-done"></i>완료</span>
+      <span><i class="l-now"></i>지금 과목</span>
+      <span><i></i>대기</span>
+      <span>굵은 글자는 깊게 하는 과목</span>
+    </div>
+  </section>
+
+  <section class="stats" aria-labelledby="statH">
+    <h2 id="statH" style="margin-bottom:8px">지금까지</h2>
+    <div id="stats"></div>
+  </section>
+
+  <section aria-labelledby="fieldH">
+    <h2 id="fieldH">분야별 진도</h2>
+    <p class="fine">다른 분야를 겸하는 과목은 양쪽에 함께 셌어.</p>
+    <ul id="fields" class="frows"></ul>
+  </section>
+
+  <section aria-labelledby="listH">
+    <h2 id="listH">과목 순서</h2>
+    <div id="list" class="clist"></div>
+  </section>
+
+  <details class="fold" id="rulesBox">
+    <summary><h2>규칙</h2></summary>
+    <ol class="rules">
+      <li>번호 순서대로 한 번에 한 과목만 해.</li>
+      <li>주 4회, 회당 90분. 과목에 붙은 방식이 네 번의 쓰임을 정해. 깊게는 강의 2회와 문제·읽기 2회, 표준은 강의 3회와 복습 1회, 훑기는 강의 4회.</li>
+      <li>다 못 한 칸은 다음 주로 그대로 넘어가. 두 주 치를 한 주에 몰아서 하지 않아.</li>
+      <li>깊게: 문제 세트를 전부 풀고, 기말 80% 이상이면 통과. 미달이면 복습 한 묶음 뒤 다른 기출로 한 번 더 보고 넘어가. 과목마다 1차 텍스트 하나로 글 한 편을 쓰고, 끝나면 1주 쉬어.</li>
+      <li>표준: 기말 60% 이상이면 완료. 미달이면 복습 한 묶음 뒤 완료.</li>
+      <li>훑기: 문제 없이 강의만 듣고, 끝나면 한 쪽 개념 지도를 써.</li>
+      <li>공개된 시험이 없는 과목은 한 쪽 개념 지도로 끝내.</li>
+      <li>속도 조정 과목은 단원 시험 점수로 주당 강의 수를 바꿔. 80% 이상이면 하나 늘리고, 60% 미만이면 하나 줄여. 범위는 2에서 4.</li>
+      <li>과목이 끝나면 점수와 한 줄 요약을 정해둔 한 사람에게 보내.</li>
+      <li>과목 도중에 자료를 바꾸지 않아. 도저히 안 맞으면 Claude에게 대체 자료를 물어봐.</li>
+      <li>예상 완주가 10년을 넘어도 과목을 빼거나 회차를 억지로 늘리지 않아. 10년 시점은 어디까지 왔는지 보는 점검 지점이야.</li>
+    </ol>
+  </details>
+
+  <details class="fold" id="setBox">
+    <summary><h2>설정</h2></summary>
+    <label class="field">회차 길이
+      <select id="minSel">
+        <option value="90">90분, 주 6시간</option>
+        <option value="105">105분, 주 7시간</option>
+        <option value="120">120분, 주 8시간</option>
+      </select>
+    </label>
+    <p class="fine" style="margin-top:14px">공부 약속을 언제, 어디서로 적어두면 이번 주 칸 옆에 보여.</p>
+    <label class="field">첫째 회차 <input data-slot="0" maxlength="40" placeholder="예: 화요일 밤 9시, 연구실 나오기 전"></label>
+    <label class="field">둘째 회차 <input data-slot="1" maxlength="40" placeholder="예: 목요일 밤 9시, 연구실"></label>
+    <label class="field">셋째 회차 <input data-slot="2" maxlength="40" placeholder="예: 토요일 오전 10시, 집"></label>
+    <label class="field">넷째 회차 <input data-slot="3" maxlength="40" placeholder="예: 토요일 오전 11시 반, 집"></label>
+    <p class="fine" style="margin-top:18px" id="backupNote"></p>
+    <div class="acts"><button class="btn ghost" data-act="export">백업 파일 저장</button><button class="btn ghost" data-act="import">백업 불러오기</button><input id="importIn" type="file" accept="application/json,.json" hidden></div>
+  </details>
+
+  <p id="storeNote" class="fine"></p>
+</main>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- data ---------- */
+const FIELDS=[
+  {c:'경',n:'경제학',goal:'상급 학사 이상'},
+  {c:'사',n:'사회학',goal:'상급 학사 이상'},
+  {c:'심',n:'심리학',goal:'중하급 학사'},
+  {c:'행',n:'행정학',goal:'중하급 학사'},
+  {c:'법',n:'법학',goal:'중하급 학사'},
+  {c:'뇌',n:'뇌과학',goal:'부전공 수준 이해'},
+  {c:'약',n:'약학',goal:'부전공 수준 이해'},
+  {c:'수',n:'수학',goal:'도구 수학과 논리, 수리철학'}
+];
+const MODES={A:{n:'깊게',pace:2,pass:80},B:{n:'표준',pace:3,pass:60},C:{n:'훑기',pace:4,pass:null}};
+const NEED='자료 확정 필요.';
+const C=[
+{id:'c01',t:'사회과학 데이터 분석',f:'경',also:['사'],m:'A',r:'MIT 14.310x, Duflo와 Ellison, 2023',u:'https://ocw.mit.edu/courses/14-310x-data-analysis-for-social-scientists-spring-2023/',k:23,kl:'강',kv:true,ex:'n',est:100,note:'R 실습은 건너뛰어. 공개 시험이 없어서 한 쪽 개념 지도로 마무리해.'},
+{id:'c02',t:'미적분',f:'수',m:'B',ad:true,r:'MIT 18.01SC, 혼자 공부하는 사람용 판',u:'https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/',k:null,kl:'세션',kv:false,ex:'y',est:120,note:'문제와 해답, 시험과 해답이 다 있어. 단원 시험 점수로 속도를 바꿔.'},
+{id:'c03',t:'사회학개론',f:'사',m:'C',r:null,q:'KOCW 사회학개론 강의',k:null,kl:'강',kv:false,ex:'n',est:30,note:NEED},
+{id:'c04',t:'고전사회이론',f:'사',m:'A',r:'Yale SOCY 151, Szelényi',q:'Open Yale Courses SOCY 151 Foundations of Modern Social Theory',k:null,kl:'강',kv:false,ex:'?',est:100,note:'강의가 다룬 원전 대목을 강의 직후에 읽어.'},
+{id:'c05',t:'다변수 미적분',f:'수',m:'B',ad:true,r:'MIT 18.02SC, 혼자 공부하는 사람용 판',q:'MIT OCW 18.02SC Multivariable Calculus',k:null,kl:'세션',kv:false,ex:'y',est:120},
+{id:'c06',t:'미시경제학 원론',f:'경',m:'B',r:'MIT 14.01, Gruber, 2018',q:'MIT OCW 14.01 Principles of Microeconomics Fall 2018 Gruber',k:null,kl:'강',kv:false,ex:'?',est:45},
+{id:'c07',t:'중급미시경제학',f:'경',m:'A',r:'MIT 14.04, Townsend, 2020',u:'https://ocw.mit.edu/courses/14-04-intermediate-microeconomic-theory-fall-2020/',k:21,kl:'강',kv:true,ex:'y',est:100,note:'시험과 해답이 공개돼 있어. 시험 대비 강의 3개는 강의 수에서 뺐어.'},
+{id:'c08',t:'심리학개론',f:'심',m:'B',r:'Yale PSYC 110, Bloom',q:'Open Yale Courses PSYC 110 Introduction to Psychology Paul Bloom',k:20,kl:'강',kv:false,ex:'?',est:45},
+{id:'c09',t:'선형대수',f:'수',m:'B',ad:true,r:'MIT 18.06SC, Strang',q:'MIT OCW 18.06SC Linear Algebra Strang',k:null,kl:'세션',kv:false,ex:'y',est:120},
+{id:'c10',t:'인과추론과 정책평가',f:'경',also:['행'],m:'A',p:1,r:'Andrew Heiss, Program Evaluation, 2026',u:'https://evalsp26.classes.andrewheiss.com/',k:14,kl:'회차',kv:true,ex:'n',est:100,note:'회차마다 영상, 슬라이드, 읽기가 있어서 주당 1회차로 잡았어. 교재 The Effect는 웹에서 무료로 읽을 수 있어.'},
+{id:'c11',t:'세포·분자생물학',f:'뇌',also:['약'],m:'C',r:'MIT 7.016, 2018',q:'MIT OCW 7.016 Introductory Biology Fall 2018',k:null,kl:'강',kv:false,ex:'n',est:30},
+{id:'c12',t:'헌법',f:'법',m:'B',r:'KOCW 헌법, 건국대 이현출 강좌 후보',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=1278236',k:null,kl:'차시',kv:false,ex:'n',est:45,note:'일부 차시만 공개된 강좌가 있어서 시작 전에 차시가 다 있는지 확인해.'},
+{id:'c13',t:'확률론',f:'수',m:'B',ad:true,r:'Harvard Stat 110, Blitzstein',q:'Harvard Stat 110 Blitzstein lectures',k:35,kl:'강',kv:false,ex:'?',est:100},
+{id:'c14',t:'현대사회이론',f:'사',m:'A',r:null,q:'contemporary sociological theory lecture course',k:null,kl:'강',kv:false,ex:'?',est:100,note:'자료 확정 필요. 같이 읽을 사람을 붙이는 과목이야.'},
+{id:'c15',t:'인지심리학',f:'심',m:'B',r:null,q:'인지심리학 강의',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c56',t:'학습심리학',f:'심',m:'B',r:null,q:'learning psychology conditioning lecture course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c16',t:'생리학',f:'약',also:['뇌'],m:'C',r:null,q:'human physiology lecture course',k:null,kl:'강',kv:false,ex:'n',est:30,note:NEED},
+{id:'c57',t:'가족사회학',f:'사',m:'B',r:null,q:'가족사회학 강의',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c17',t:'거시경제학',f:'경',m:'A',r:'MIT 14.02, Caballero, 2023',u:'https://ocw.mit.edu/courses/14-02-principles-of-macroeconomics-spring-2023/',k:null,kl:'강',kv:false,ex:'y',est:100,note:'시험과 해답, 문제 세트 해답까지 공개돼 있어.'},
+{id:'c18',t:'수리통계',f:'수',m:'B',ad:true,r:'MIT 18.650, Rigollet, 2016',q:'MIT OCW 18.650 Statistics for Applications Fall 2016',k:null,kl:'강',kv:false,ex:'?',est:80},
+{id:'c19',t:'민법총칙',f:'법',m:'B',r:'KOCW 민법총칙, 부산대 강좌 후보',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=1430531',k:null,kl:'차시',kv:false,ex:'n',est:45,note:'차시가 다 공개됐는지 확인해.'},
+{id:'c58',t:'국제경제학',f:'경',m:'B',r:null,q:'international economics trade finance lecture course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c20',t:'뇌과학 입문',f:'뇌',also:['심'],m:'C',r:'MIT 9.13 The Human Brain, Kanwisher',q:'MIT OCW 9.13 The Human Brain Spring 2019 Kanwisher',k:null,kl:'강',kv:false,ex:'n',est:30},
+{id:'c21',t:'논리학 입문',f:'수',m:'A',r:null,q:'introduction to formal logic course video',k:null,kl:'강',kv:false,ex:'?',est:100,note:'자료 확정 필요. 명제논리와 술어논리, 증명 연습 중심.'},
+{id:'c22',t:'사회심리학',f:'심',m:'B',r:null,q:'social psychology lecture course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c59',t:'지각심리학',f:'심',also:['뇌'],m:'B',r:null,q:'sensation and perception psychology lecture course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c23',t:'행정학원론',f:'행',m:'B',r:null,q:'KOCW 행정학원론',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c60',t:'도시사회학',f:'사',m:'B',r:null,q:'도시사회학 강의',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c24',t:'계량경제학',f:'경',m:'A',r:null,q:'undergraduate econometrics lecture course',k:null,kl:'강',kv:false,ex:'?',est:100,note:NEED},
+{id:'c25',t:'미분방정식',f:'수',m:'B',ad:true,r:'MIT 18.03SC, 혼자 공부하는 사람용 판',q:'MIT OCW 18.03SC Differential Equations',k:null,kl:'세션',kv:false,ex:'y',est:120},
+{id:'c26',t:'조직사회학',f:'사',also:['행'],m:'B',r:null,q:'sociology of organizations course',k:null,kl:'강',kv:false,ex:'?',est:45,note:'자료 확정 필요. 행정학 조직론을 겸해.'},
+{id:'c61',t:'노동경제학',f:'경',m:'B',r:null,q:'labor economics lecture course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c27',t:'채권총론',f:'법',m:'B',r:null,q:'KOCW 채권총론',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c28',t:'질적연구방법',f:'사',m:'A',r:null,q:'qualitative research methods sociology course',k:null,kl:'강',kv:false,ex:'?',est:100,note:'자료 확정 필요. 같이 읽을 사람을 붙이는 과목이야.'},
+{id:'c29',t:'발달심리학',f:'심',m:'B',r:null,q:'developmental psychology lecture course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c30',t:'신경과학 개론',f:'뇌',m:'C',r:null,q:'fundamentals of neuroscience course video',k:null,kl:'강',kv:false,ex:'n',est:30,note:NEED},
+{id:'c31',t:'사회조사방법',f:'사',m:'B',r:null,q:'KOCW 사회조사방법론',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c62',t:'인사행정론',f:'행',m:'B',r:null,q:'KOCW 인사행정론',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c32',t:'게임이론',f:'경',m:'A',r:'Yale ECON 159, Polak',q:'Open Yale Courses ECON 159 Game Theory Polak',k:24,kl:'강',kv:false,ex:'?',est:100},
+{id:'c33',t:'미시 응용과 정책',f:'경',also:['행'],m:'B',r:null,q:'MIT 14.03 microeconomic theory and public policy',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c63',t:'산업조직론',f:'경',m:'B',r:null,q:'industrial organization economics lecture course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c34',t:'채권각론',f:'법',m:'B',r:null,q:'KOCW 채권각론',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c35',t:'약리학',f:'약',m:'C',r:null,q:'pharmacology lecture course',k:null,kl:'강',kv:false,ex:'n',est:30,note:'자료 확정 필요. 총론과 계통별 각론을 한 과목으로.'},
+{id:'c36',t:'메타논리',f:'수',m:'A',r:null,q:'metalogic Gödel incompleteness course',k:null,kl:'강',kv:false,ex:'?',est:100,note:'자료 확정 필요. 완전성 정리, 불완전성 정리, 계산가능성.'},
+{id:'c37',t:'이상심리학',f:'심',m:'B',r:null,q:'abnormal psychology lecture course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c64',t:'심리측정',f:'심',also:['사'],m:'B',r:null,q:'psychometrics reliability validity factor analysis course',k:null,kl:'강',kv:false,ex:'?',est:45,note:'자료 확정 필요. 신뢰도, 타당도, 요인분석.'},
+{id:'c38',t:'경제수학과 최적화',f:'수',also:['경'],m:'B',ad:true,r:null,q:'mathematics for economists optimization course',k:null,kl:'강',kv:false,ex:'?',est:60,note:NEED},
+{id:'c39',t:'물권법',f:'법',m:'B',r:null,q:'KOCW 물권법',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c40',t:'사회계층과 불평등',f:'사',m:'A',r:null,q:'social stratification inequality sociology course',k:null,kl:'강',kv:false,ex:'?',est:100,note:'자료 확정 필요. 같이 읽을 사람을 붙이는 과목이야.'},
+{id:'c41',t:'행동경제학',f:'경',also:['심'],m:'B',r:null,q:'MIT 14.13 Psychology and Economics',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c42',t:'정책학',f:'행',m:'B',r:null,q:'KOCW 정책학',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c65',t:'상법',f:'법',m:'B',r:null,q:'KOCW 상법총칙 회사법',k:null,kl:'차시',kv:false,ex:'n',est:45,note:'자료 확정 필요. 상법총칙과 회사법 중심.'},
+{id:'c43',t:'인지신경과학',f:'뇌',also:['심'],m:'C',r:null,q:'cognitive neuroscience lecture course',k:null,kl:'강',kv:false,ex:'n',est:30,note:NEED},
+{id:'c44',t:'거시 후속, 성장과 동태',f:'경',m:'A',r:null,q:'intermediate macroeconomics growth dynamic models course',k:null,kl:'강',kv:false,ex:'?',est:100,note:NEED},
+{id:'c45',t:'형법총론',f:'법',m:'B',r:'KOCW 형법총론, 숭실대 강좌 후보',u:'http://www.kocw.net/home/search/kemView.do?kemId=998189',k:null,kl:'차시',kv:false,ex:'n',est:45,note:'차시가 다 공개됐는지 확인해.'},
+{id:'c53',t:'형법각론',f:'법',m:'B',r:null,q:'KOCW 형법각론',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c46',t:'수리물리',f:'수',m:'B',ad:true,r:null,q:'KOCW 수리물리학',k:null,kl:'강',kv:false,ex:'?',est:80,note:'자료 확정 필요. 복소해석, 푸리에 해석, 편미분방정식.'},
+{id:'c47',t:'신약개발 개론',f:'약',m:'C',r:null,q:'drug discovery and development course',k:null,kl:'강',kv:false,ex:'n',est:30,note:NEED},
+{id:'c48',t:'수리철학',f:'수',m:'A',r:null,q:'philosophy of mathematics course',k:null,kl:'강',kv:false,ex:'?',est:100,note:'자료 확정 필요. 계보 암기 없이 역설, 무한, 증명 같은 문제 중심으로.'},
+{id:'c49',t:'성격심리학',f:'심',m:'B',r:null,q:'personality psychology course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c50',t:'행정법',f:'법',also:['행'],m:'B',r:null,q:'KOCW 행정법총론',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c66',t:'형사소송법',f:'법',m:'B',r:null,q:'KOCW 형사소송법',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c51',t:'정치사회학',f:'사',m:'B',r:null,q:'political sociology course',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c52',t:'경제학 실증 논문 읽기',f:'경',m:'A',p:1,r:'논문 12편, 목록은 들어갈 때 Claude가 골라줌',k:12,kl:'편',kv:true,ex:'n',est:100,note:'한 주에 한 편 읽고 한 쪽 평가를 써.'},
+{id:'c54',t:'발전경제학',f:'경',m:'B',r:null,q:'MIT 14.73 The Challenges of World Poverty',k:null,kl:'강',kv:false,ex:'?',est:45,note:NEED},
+{id:'c67',t:'민사소송법',f:'법',m:'B',r:null,q:'KOCW 민사소송법',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c68',t:'재무행정론',f:'행',also:['경'],m:'B',r:null,q:'KOCW 재무행정론',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c69',t:'지방행정론',f:'행',m:'B',r:null,q:'KOCW 지방행정론',k:null,kl:'차시',kv:false,ex:'n',est:45,note:NEED},
+{id:'c55',t:'사회학 논문과 모노그래프 읽기',f:'사',m:'A',p:1,r:'논문과 책 12편, 목록은 들어갈 때 Claude가 골라줌',k:12,kl:'편',kv:true,ex:'n',est:100,note:'한 주에 한 편 읽고 한 쪽 평가를 써. 같이 읽을 사람을 붙여.'}
+];
+C.forEach((c,i)=>{c.n=i+1;});
+const BY=Object.fromEntries(C.map(c=>[c.id,c]));
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const SEARCH=q=>'https://www.google.com/search?q='+encodeURIComponent(q);
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function today(){return ymd(new Date());}
+function parseD(s){const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2]);}
+function addDays(s,n){const d=parseD(s);d.setDate(d.getDate()+n);return ymd(d);}
+function addYears(s,n){const d=parseD(s);d.setFullYear(d.getFullYear()+n);return ymd(d);}
+function fmtYM(s){const d=parseD(s);return d.getFullYear()+'년 '+(d.getMonth()+1)+'월';}
+function fmtMD(s){const d=parseD(s);return (d.getMonth()+1)+'월 '+d.getDate()+'일';}
+function fmtYMD(s){const d=parseD(s);return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일';}
+function isoWeek(s){const d=parseD(s);const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));const w=Math.ceil(((t-y0)/86400000+1)/7);return t.getUTCFullYear()+'-W'+String(w).padStart(2,'0');}
+const fieldName=ch=>(FIELDS.find(F=>F.c===ch)||{n:ch}).n;
+function flash(msg){const el=$('#flash');el.textContent=msg;clearTimeout(flash.t);flash.t=setTimeout(()=>{el.textContent='';},6000);}
+
+/* ---------- state ---------- */
+function blank(){return {v:1,courses:{},settings:{min:90,slots:['','','','']},weeks:[],restUntil:null,startedAt:null,updatedAt:0,ov:{},lastBackup:null};}
+function normalize(d){
+  const b=blank();
+  if(!d||typeof d!=='object')return b;
+  b.courses=d.courses&&typeof d.courses==='object'?d.courses:{};
+  Object.values(b.courses).forEach(x=>{if(x&&x.st==='skip')x.st='todo';});
+  b.settings.min=[90,105,120].includes(d.settings&&d.settings.min)?d.settings.min:90;
+  const sl=d.settings&&Array.isArray(d.settings.slots)?d.settings.slots:[];
+  b.settings.slots=[0,1,2,3].map(i=>typeof sl[i]==='string'?sl[i]:'');
+  b.weeks=Array.isArray(d.weeks)?d.weeks.filter(x=>typeof x==='string'):[];
+  b.restUntil=typeof d.restUntil==='string'?d.restUntil:null;
+  b.startedAt=typeof d.startedAt==='string'?d.startedAt:null;
+  b.ov=d.ov&&typeof d.ov==='object'?d.ov:{};
+  b.lastBackup=typeof d.lastBackup==='string'?d.lastBackup:null;
+  b.updatedAt=typeof d.updatedAt==='number'?d.updatedAt:0;
+  return b;
+}
+let S=blank();
+const CD={};   // per-course docs: {items:[], map:''}
+const OPEN=new Set();
+let lastDoneId=null;
+
+function st(id){return S.courses[id]||{st:'todo',done:0};}
+function stw(id){if(!S.courses[id])S.courses[id]={st:'todo',done:0};return S.courses[id];}
+function cv(c){
+  const o=(S.ov&&S.ov[c.id])||{};const r=Object.assign({},c);
+  ['r','u','q','k','kl','ex','note','p','kv'].forEach(key=>{if(o[key]!==undefined&&o[key]!==null)r[key]=o[key];});
+  if(o.r&&typeof r.note==='string')r.note=r.note.replace(/^자료 확정 필요\.\s*/,'');
+  return r;
+}
+function units(c){const s=st(c.id);if(typeof s.k==='number'&&s.k>0)return s.k;const b=cv(c);return (typeof b.k==='number'&&b.k>0)?b.k:null;}
+function unitsOk(c){const s=st(c.id);if(s.kv&&units(c))return true;const b=cv(c);return !!(b.kv&&units(c));}
+function pace(c){const s=st(c.id);return s.pace||cv(c).p||MODES[c.m].pace;}
+function cur(){return C.find(c=>{const x=st(c.id).st;return x!=='done'&&x!=='skip';})||null;}
+function statusWord(c){const s=st(c.id).st;const k=cur();if(s==='done')return '완료';if(s==='skip')return '뺌';if(k&&k.id===c.id)return s==='todo'?'다음 차례':'진행 중';return '';}
+function unitName(c,n){const kl=cv(c).kl||'강';if(kl==='세션')return '세션 '+n;if(kl==='편')return n+'편째 읽기';return n+kl;}
+function workName(c,kind){if(kind==='wrap')return '남은 문제 세트';if(kind==='review')return '틀린 부분 복습';if(cv(c).kl==='편')return '읽고 평가 쓰기';if(c.m==='A')return '문제·읽기';if(c.m==='B')return '복습·문제';return '복습';}
+function resourceHTML(b){
+  if(!b.r)return '<span class="fine">자료가 아직 정해지지 않았어.</span>';
+  if(b.u)return '<a href="'+esc(b.u)+'" target="_blank" rel="noopener">'+esc(b.r)+'</a>';
+  return esc(b.r)+(b.q?' <a href="'+esc(SEARCH(b.q))+'" target="_blank" rel="noopener">찾아보기</a>':'');
+}
+
+/* ---------- storage: this browser only ---------- */
+const LS='ledger1:';
+function lsGet(k){try{const v=localStorage.getItem(LS+k);return v?JSON.parse(v):null;}catch(e){return null;}}
+let warned=false;
+function lsSet(k,v){try{localStorage.setItem(LS+k,JSON.stringify(v));return true;}catch(e){if(!warned){warned=true;flash('기록을 저장하지 못했어. 설정에서 백업 파일을 먼저 받아둬.');}return false;}}
+function save(){S.updatedAt=Date.now();lsSet('main',S);}
+function saveCD(id){const d=CD[id]||{items:[],map:''};lsSet('cd-'+id,{items:d.items||[],map:d.map||''});}
+function loadCD(id){
+  if(!CD[id]){const l=lsGet('cd-'+id);CD[id]={items:(l&&Array.isArray(l.items))?l.items:[],map:(l&&typeof l.map==='string')?l.map:''};}
+  return Promise.resolve(CD[id]);
+}
+function daysSince(x){return Math.floor((parseD(today())-parseD(x))/86400000);}
+function backupDue(){
+  const started=Object.values(S.courses).some(x=>x&&x.st&&x.st!=='todo');
+  if(!started)return false;
+  return S.lastBackup?daysSince(S.lastBackup)>=30:S.weeks.length>=2;
+}
+function setStoreNote(){
+  $('#storeNote').textContent='기록은 이 브라우저에만 저장돼. 폰을 바꾸거나 브라우저 데이터를 지우기 전에 설정에서 백업 파일을 받아둬.';
+  const n=$('#backupNote');
+  if(n)n.textContent=S.lastBackup?'마지막 백업: '+fmtYMD(S.lastBackup)+'.':'아직 백업 파일을 받은 적이 없어.';
+}
+function exportAll(){
+  const out={main:S,courses:{}};
+  C.forEach(c=>{const l=lsGet('cd-'+c.id);if(l&&((l.items&&l.items.length)||l.map))out.courses[c.id]={items:l.items||[],map:l.map||''};});
+  try{
+    const blob=new Blob([JSON.stringify(out,null,1)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='10년-공부-기록-백업-'+today()+'.json';
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
+    S.lastBackup=today();save();render();flash('백업 파일을 저장했어. 다운로드 폴더에 있어.');
+  }catch(e){flash('백업 파일을 만들지 못했어.');}
+}
+async function importFile(file){
+  let data;
+  try{data=JSON.parse(await file.text());}catch(e){data=null;}
+  if(!data||!data.main||data.main.v!==1){flash('이 파일은 읽을 수 없어. 기록 페이지에서 받은 백업 파일인지 확인해 줘.');return;}
+  if(Object.keys(S.courses).length>0&&!confirm('이 백업으로 지금 기록을 덮어쓸까? 지금 기록은 사라져.'))return;
+  S=normalize(data.main);save();
+  Object.keys(CD).forEach(k=>{delete CD[k];});
+  C.forEach(c=>{try{localStorage.removeItem(LS+'cd-'+c.id);}catch(e){}});
+  Object.entries(data.courses||{}).forEach(([id,v])=>{if(BY[id]&&v)lsSet('cd-'+id,{items:Array.isArray(v.items)?v.items:[],map:typeof v.map==='string'?v.map:''});});
+  const c=cur();if(c)loadCD(c.id);
+  render();flash('백업을 불러왔어.');
+}
+function ovBox(c){return '<div class="copyrow"><input data-ov="'+c.id+'" placeholder="Claude가 준 코드 붙여넣기" aria-label="'+esc(c.t)+' 자료 코드"><button class="btn ghost sm" data-act="applyOv" data-id="'+c.id+'">적용</button></div>';}
+function applyOv(id,raw){
+  let o=null;try{o=JSON.parse(String(raw).trim());}catch(e){}
+  if(!o||typeof o!=='object'){flash('코드를 읽지 못했어. Claude가 준 한 줄을 그대로 붙여넣어 줘.');return;}
+  if(o.id&&o.id!==id){if(!BY[o.id]){flash('코드의 과목 번호가 맞지 않아.');return;}id=o.id;}
+  const clean={};
+  if(typeof o.r==='string'&&o.r.trim())clean.r=o.r.trim().slice(0,160);
+  if(typeof o.u==='string'&&/^https?:\/\//.test(o.u.trim()))clean.u=o.u.trim().slice(0,600);
+  const k=Math.round(Number(o.k));if(k>=1&&k<=400){clean.k=k;clean.kv=true;}
+  if(['강','세션','회차','차시','편'].includes(o.kl))clean.kl=o.kl;
+  if(['y','n','?'].includes(o.ex))clean.ex=o.ex;
+  if(typeof o.note==='string'&&o.note.trim())clean.note=o.note.trim().slice(0,240);
+  if(!clean.r){flash('코드에 자료 이름이 없어.');return;}
+  S.ov=S.ov||{};S.ov[id]=Object.assign({},S.ov[id]||{},clean);
+  save();render();flash(BY[id].n+'번 '+BY[id].t+' 자료를 넣었어.');
+}
+
+/* ---------- actions ---------- */
+function newSet(s,kind,L){s.setNo=(s.setNo||0)+1;return {no:s.setNo,base:s.done||0,L:L,kind:kind,checks:[false,false,false,false],note:''};}
+function addWeek(){const w=isoWeek(today());if(!S.weeks.includes(w))S.weeks.push(w);}
+function start(c,k){
+  const s=stw(c.id);
+  if(k){s.k=k;s.kv=true;}
+  s.st='run';s.start=today();s.done=0;s.min=s.min||0;
+  if(!S.startedAt)S.startedAt=today();
+  s.set=newSet(s,'run',Math.min(pace(c),units(c)));
+  save();render();
+}
+function toggleSlot(i){
+  const c=cur();if(!c)return;const s=stw(c.id);const set=s.set;if(!set)return;
+  const on=!set.checks[i];set.checks[i]=on;
+  const isLec=set.kind==='run'&&i<set.L;
+  if(isLec)s.done=set.base+set.checks.slice(0,set.L).filter(Boolean).length;
+  const m=S.settings.min;
+  if(!CD[c.id])CD[c.id]={items:[],map:''};
+  const items=CD[c.id].items;
+  if(on){
+    items.push({d:today(),k:isLec?'L':'W',u:isLec?set.base+i+1:null,s:set.no,x:i,m:m});
+    s.min=(s.min||0)+m;addWeek();
+  }else{
+    for(let j=items.length-1;j>=0;j--){if(items[j].s===set.no&&items[j].x===i){s.min=Math.max(0,(s.min||0)-(items[j].m||m));items.splice(j,1);break;}}
+  }
+  saveCD(c.id);save();render();
+}
+function nextSet(){
+  const c=cur();if(!c)return;const s=stw(c.id);
+  if(s.set&&s.set.note){
+    if(!CD[c.id])CD[c.id]={items:[],map:''};
+    CD[c.id].items.push({d:today(),k:'N',s:s.set.no,t:s.set.note.slice(0,300)});saveCD(c.id);
+  }
+  if(s.st==='run'){
+    const L=Math.min(pace(c),Math.max(0,units(c)-(s.done||0)));
+    if(L===0){finishLectures(c,s);}else{s.set=newSet(s,'run',L);}
+  }else if(s.st==='wrap'){s.set=newSet(s,'wrap',0);}
+  else if(s.st==='review'){done(c,s);}
+  else if(s.st==='retry'){s.set=null;}
+  save();render();
+}
+function finishLectures(c,s){
+  s.set=null;
+  if(c.m==='A'){s.st='wrap';s.set=newSet(s,'wrap',0);flash('강의를 다 들었어. 남은 문제 세트를 마무리하자.');}
+  else endPhase(c,s);
+}
+function endPhase(c,s){
+  s.set=null;const ex=cv(c).ex;
+  s.st=ex==='y'?'exam':ex==='n'?'map':'end';
+  if(s.st==='map')loadCD(c.id).then(render);
+}
+function submitScore(raw){
+  const c=cur();if(!c)return;const s=stw(c.id);
+  const sc=Math.round(Number(raw));
+  if(!(raw!==''&&sc>=0&&sc<=100)){flash('0에서 100 사이 숫자로 적어줘.');return;}
+  const pass=MODES[c.m].pass||60;
+  if(s.st==='exam'){
+    s.s1=sc;
+    if(sc>=pass){if(c.m==='A'){s.st='essay';flash('통과. 이제 글 한 편만 남았어.');}else done(c,s);}
+    else{s.st=c.m==='A'?'retry':'review';s.set=newSet(s,'review',0);flash(sc+'%. 틀린 부분을 한 묶음 복습하고 가자.');}
+  }else if(s.st==='retry'){s.s2=sc;s.set=null;s.st='essay';flash('기록했어. 규칙대로 이제 글 한 편 쓰고 넘어가.');}
+  save();render();
+}
+function done(c,s){
+  s.st='done';s.end=today();s.set=null;
+  if(c.m==='A')S.restUntil=addDays(today(),7);
+  lastDoneId=c.id;
+  flash(c.n+'번 '+c.t+' 완료.');
+}
+function checkpoint(raw){
+  const c=cur();if(!c)return;const s=stw(c.id);
+  const sc=Math.round(Number(raw));
+  if(!(raw!==''&&sc>=0&&sc<=100)){flash('0에서 100 사이 숫자로 적어줘.');return;}
+  (s.cps=s.cps||[]).push(sc);
+  let p=pace(c);const before=p;
+  if(sc>=80)p=Math.min(4,p+1);else if(sc<60)p=Math.max(2,p-1);
+  s.pace=p;
+  const kl=cv(c).kl==='세션'?'세션':'강';
+  flash(p===before?('그대로 주당 '+p+kl+'.'):('다음 묶음부터 주당 '+p+kl+'.'));
+  save();render();
+}
+
+/* ---------- render ---------- */
+const TICK='<span class="tick" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="var(--on-btn)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+
+function slotsHTML(c,s){
+  const set=s.set;const plans=S.settings.slots;
+  let h='<ul class="slots">';
+  for(let i=0;i<4;i++){
+    const lab=(set.kind==='run'&&i<set.L)?unitName(c,set.base+i+1):workName(c,set.kind);
+    const plan=plans[i]?'<span class="slot-p">'+esc(plans[i])+'</span>':'';
+    h+='<li><button class="slot" role="checkbox" aria-checked="'+(set.checks[i]?'true':'false')+'" data-act="slot" data-i="'+i+'">'+TICK+'<span class="slot-l">'+esc(lab)+'</span>'+plan+'</button></li>';
+  }
+  h+='</ul>';
+  h+='<label class="field">막힌 곳 한 줄, 적고 싶을 때만<input id="noteIn" maxlength="300" value="'+esc(set.note||'')+'"></label>';
+  return h;
+}
+function renderNow(){
+  const el=$('#now');
+  if(S.restUntil&&S.restUntil>today()){
+    el.innerHTML='<h2 class="now-title" id="nowLabel">쉬는 주야</h2><p style="margin-top:8px">깊게 한 과목을 마쳤으니 '+fmtMD(S.restUntil)+'까지 쉬어.</p><div class="acts"><button class="btn ghost" data-act="endRest">다음 과목 시작</button></div>';
+    return;
+  }
+  const c=cur();
+  if(!c){el.innerHTML='<h2 class="now-title" id="nowLabel">'+C.length+'과목을 다 마쳤어</h2><p style="margin-top:8px">10년 기록이 여기 다 남아 있어.</p>';return;}
+  const b=cv(c),s=st(c.id),k=units(c);
+  let h='<div class="now-head"><span class="now-no" aria-hidden="true">'+c.n+'</span><div><h2 class="now-title" id="nowLabel">'+esc(c.t)+'</h2><p class="now-meta">'+c.n+'번째 과목, '+fieldName(c.f)+', '+MODES[c.m].n+(c.ad?', 속도 조정':'')+'</p></div></div>';
+  h+='<p class="res">'+resourceHTML(b)+'</p>';
+  if(b.note)h+='<p class="fine">'+esc(b.note)+'</p>';
+
+  if(s.st==='todo'){
+    if(!b.r){
+      const ask='10년 공부 기록 '+c.n+'번('+c.id+') '+c.t+' 자료를 정해줘. 답은 {"id":"'+c.id+'","r":"자료 이름","u":"링크","k":강의 수} 형식의 코드 한 줄로.';
+      h+='<p style="margin-top:12px">이 문장을 Claude에게 보내고, 받은 코드를 아래에 붙여넣어.</p><div class="copyrow"><input readonly value="'+esc(ask)+'" aria-label="Claude에게 보낼 문장"><button class="btn ghost sm" data-act="copy" data-text="'+esc(ask)+'">복사</button></div>'+ovBox(c);
+    }
+    if(!unitsOk(c)){
+      h+='<div class="inline"><label class="field">'+esc(b.kl||'강')+' 수, 강의 페이지에서 세서 확인해 줘<input id="unitsIn" type="number" min="1" max="400" inputmode="numeric" value="'+(k||'')+'"></label><button class="btn" data-act="startWith">이 수로 시작</button></div>';
+    }else{
+      h+='<p class="fine" style="margin-top:12px">'+k+(b.kl==='세션'?'개 세션':b.kl==='편'?'편':b.kl)+', 주당 '+pace(c)+'개씩.</p><div class="acts"><button class="btn" data-act="start">시작하기</button></div>';
+    }
+  }else if(s.set&&['run','wrap','review','retry'].includes(s.st)){
+    const set=s.set;const all=set.checks.every(Boolean);
+    let title='이번 주 할 일',right='';
+    if(s.st==='run'){right=(s.done||0)+' / '+k;}
+    if(s.st==='wrap'){title='남은 문제 세트 마무리';}
+    if(s.st==='review'){title='복습 한 묶음';right='기말 '+s.s1+'%';}
+    if(s.st==='retry'){title='복습 한 묶음, 그다음 다른 기출';right='기말 '+s.s1+'%';}
+    h+='<div class="week-h"><h3>'+title+'</h3><span>'+right+'</span></div>';
+    h+=slotsHTML(c,s);
+    let main='';
+    if(s.st==='run'){const last=(s.done||0)>=k;main='<button class="btn" data-act="next"'+(all?'':' disabled')+'>'+(last?'강의 끝, 다음 단계로':'다음 묶음')+'</button>';}
+    if(s.st==='wrap')main='<button class="btn" data-act="next"'+(all?'':' disabled')+'>다음 묶음</button><button class="btn ghost" data-act="wrapDone">문제 세트 다 풀었어</button>';
+    if(s.st==='review')main='<button class="btn" data-act="next"'+(all?'':' disabled')+'>복습 끝, 과목 완료</button>';
+    if(s.st==='retry')main='<button class="btn" data-act="next"'+(all?'':' disabled')+'>복습 끝, 다른 기출 보기</button>';
+    h+='<div class="acts">'+main+'</div>';
+    if(!all)h+='<p class="fine">네 칸을 다 채우면 다음으로 넘어가. 못 채운 칸은 다음 주로 그대로 넘어가.</p>';
+    if(c.ad&&s.st==='run'){
+      h+='<div class="inline" style="margin-top:6px"><label class="field">단원 시험 점수, 볼 때마다<input id="cpIn" type="number" min="0" max="100" inputmode="numeric"></label><button class="btn ghost" data-act="checkpoint">속도 반영</button></div><p class="fine">지금 주당 '+pace(c)+'개. 80% 이상이면 하나 늘고, 60% 미만이면 하나 줄어.</p>';
+    }
+  }else if(s.st==='retry'){
+    h+='<div class="week-h"><h3>다른 기출로 한 번 더</h3><span>첫 시도 '+s.s1+'%</span></div><div class="inline"><label class="field">점수(%)<input id="scoreIn" type="number" min="0" max="100" inputmode="numeric"></label><button class="btn" data-act="score">점수 기록</button></div><p class="fine">이번 점수와 상관없이 기록하고 글 쓰기로 넘어가.</p>';
+  }else if(s.st==='end'){
+    h+='<div class="week-h"><h3>강의 끝</h3></div><p style="margin-top:8px">이 과목에 공개된 기출이 있어?</p><div class="acts"><button class="btn" data-act="hasExam">있어, 점수 기록</button><button class="btn ghost" data-act="noExam">없어, 한 쪽 지도</button></div>';
+  }else if(s.st==='exam'){
+    const pass=MODES[c.m].pass||60;
+    h+='<div class="week-h"><h3>기말 시험</h3></div><div class="inline"><label class="field">시간 재고 푼 점수(%)<input id="scoreIn" type="number" min="0" max="100" inputmode="numeric"></label><button class="btn" data-act="score">점수 기록</button></div><p class="fine">'+pass+'% 이상이면 통과. '+(c.m==='A'?'미달이면 복습 한 묶음 뒤 다른 기출로 한 번 더.':'미달이면 복습 한 묶음 뒤 완료.')+'</p>';
+  }else if(s.st==='map'){
+    const txt=(CD[c.id]&&CD[c.id].map)||'';
+    h+='<div class="week-h"><h3>한 쪽 개념 지도</h3></div><label class="field">강의 목록만 보고 핵심 개념과 그 관계를 적어<textarea id="mapIn" maxlength="4000">'+esc(txt)+'</textarea></label><div class="acts"><button class="btn" data-act="mapDone">지도 다 썼어</button></div>';
+  }else if(s.st==='essay'){
+    const e=s.essay||{};
+    h+='<div class="week-h"><h3>글 한 편</h3>'+(s.s1!=null?'<span>기말 '+(s.s2!=null?s.s2:s.s1)+'%</span>':'')+'</div><p class="fine" style="margin-top:8px">이 과목에서 다룬 원전 대목, 판례, 논문 중 하나를 골라 이 과목의 도구로 짧게 써.</p><label class="field">글 제목<input id="essayT" maxlength="120" value="'+esc(e.t||'')+'"></label><label class="field">다룬 1차 텍스트<input id="essayS" maxlength="160" value="'+esc(e.src||'')+'"></label><div class="acts"><button class="btn" data-act="essayDone">글 다 썼어</button></div>';
+  }
+  if(!S.settings.slots.some(Boolean)&&s.st!=='todo'){
+    h+='<p class="fine" style="margin-top:10px">설정에 네 번의 공부 약속을 적어두면 칸 옆에 보여.</p>';
+  }
+  el.innerHTML=h;
+}
+function renderGrid(){
+  const k=cur();
+  $('#grid').innerHTML=C.map(c=>{
+    const x=st(c.id).st;
+    let cls='cell m'+c.m;
+    if(x==='done')cls+=' is-done';else if(x==='skip')cls+=' is-skip';else if(k&&k.id===c.id)cls+=' is-now';
+    if(lastDoneId===c.id)cls+=' pop';
+    const w=statusWord(c);
+    const lab=c.n+'번 '+c.t+(w?', '+w:'');
+    return '<button class="'+cls+'" data-act="open" data-id="'+c.id+'" aria-label="'+esc(lab)+'" title="'+esc(lab)+'">'+c.f+'</button>';
+  }).join('');
+  lastDoneId=null;
+}
+function stats(){
+  const active=C.filter(c=>st(c.id).st!=='skip');
+  const doneC=active.filter(c=>st(c.id).st==='done');
+  const totalMin=C.reduce((a,c)=>a+(st(c.id).min||0),0);
+  let e=0,a=0;doneC.forEach(c=>{const m=st(c.id).min||0;if(m>0){e+=c.est;a+=m/60;}});
+  const ratio=e>0?a/e:1;
+  const wk=S.settings.min*4/60;
+  const line=addYears(S.startedAt||today(),10);
+  const lineW=(parseD(line)-parseD(today()))/604800000;
+  let acc=0,atLine=null;
+  active.forEach(c=>{
+    const s=st(c.id);if(s.st==='done')return;
+    let frac=0;const k=units(c);
+    if(s.st==='run'&&k)frac=Math.min(1,(s.done||0)/k)*0.8;
+    else if(['wrap','end','exam','retry','review','map','essay'].includes(s.st))frac=0.85;
+    acc+=c.est*(1-frac)*ratio/wk+(c.m==='A'?1:0);
+    if(!atLine&&acc>lineW)atLine=c;
+  });
+  const eta=addDays(today(),Math.round(acc*7));
+  return {done:doneC.length,total:active.length,totalMin,ratio,eta,line,atLine,calibrated:e>0};
+}
+function renderStats(){
+  const x=stats();const hrs=Math.round(x.totalMin/60);
+  let h='';
+  h+=x.totalMin===0?'<p>아직 시작 전이야. '+x.total+'과목 중 첫 과목부터.</p>'
+    :'<p>'+x.total+'과목 중 '+x.done+'과목을 마쳤고, '+S.weeks.length+'주 동안 '+hrs+'시간을 공부했어.</p>';
+  h+='<p>지금 속도로는 '+fmtYM(x.eta)+'에 '+x.total+'과목을 다 마쳐. '+(x.calibrated?'마친 과목의 실제 시간으로 처음 추정을 '+x.ratio.toFixed(2)+'배 보정한 값이야.':'아직 마친 과목이 없어서 처음 추정치로 계산했어.')+'</p>';
+  if(today()>=x.line)h+='<p>10년 시점인 '+fmtYM(x.line)+'은 지났어.</p>';
+  else if(x.atLine)h+='<p>10년이 되는 '+fmtYM(x.line)+'에는 '+x.atLine.n+'번 과목, '+esc(x.atLine.t)+' 근처에 와 있을 거야.</p>';
+  else h+='<p>10년이 되는 '+fmtYM(x.line)+' 전에 다 마쳐.</p>';
+  if(backupDue())h+='<p>'+(S.lastBackup?'마지막 백업이 '+daysSince(S.lastBackup)+'일 전이야.':'아직 백업 파일을 받은 적이 없어.')+' <button class="btn ghost sm" data-act="export">지금 백업</button></p>';
+  $('#stats').innerHTML=h;
+}
+function renderFields(){
+  $('#fields').innerHTML=FIELDS.map(F=>{
+    const cs=C.filter(c=>st(c.id).st!=='skip'&&(c.f===F.c||(c.also||[]).includes(F.c)));
+    const d=cs.filter(c=>st(c.id).st==='done').length;
+    const pct=cs.length?Math.round(d/cs.length*100):0;
+    return '<li class="frow"><span class="cell sm" aria-hidden="true">'+F.c+'</span><div class="fmain"><p class="fname">'+F.n+'<span class="fgoal">'+F.goal+'</span></p><div class="bar" role="img" aria-label="'+F.n+' '+cs.length+'과목 중 '+d+'과목 완료"><i style="width:'+pct+'%"></i></div></div><span class="fnum">'+d+' / '+cs.length+'</span></li>';
+  }).join('');
+}
+function detailHTML(c){
+  const b=cv(c),s=st(c.id),k=units(c);
+  let h='<p class="res">'+resourceHTML(b)+'</p>';
+  if(c.also)h+='<p class="fine">'+c.also.map(fieldName).join(', ')+'도 겸해.</p>';
+  if(b.note)h+='<p class="fine">'+esc(b.note)+'</p>';
+  h+='<div class="kv"><label>'+esc(b.kl||'강')+' 수 <input type="number" min="1" max="400" inputmode="numeric" value="'+(k||'')+'" data-units="'+c.id+'" aria-label="'+esc(c.t)+' 강의 수"></label>'+(unitsOk(c)?'':'<span class="fine">확인 필요</span>')+'</div>';
+  h+='<p class="fine">시험: '+(b.ex==='y'?'공개 기출 있음':b.ex==='n'?'없음, 한 쪽 지도로 마무리':'확인 필요')+(c.ad?'. 속도 조정 과목, 지금 주당 '+pace(c)+'개':'')+'</p>';
+  if(s.start)h+='<p class="fine">'+fmtYMD(s.start)+' 시작'+(s.end?', '+fmtYMD(s.end)+' 완료':'')+(s.min?', '+Math.round(s.min/60)+'시간':'')+'</p>';
+  if(s.s1!=null)h+='<p class="fine">기말 '+s.s1+'%'+(s.s2!=null?', 다시 본 기출 '+s.s2+'%':'')+'</p>';
+  if(s.cps&&s.cps.length)h+='<p class="fine">단원 시험 '+s.cps.map(v=>v+'%').join(', ')+'</p>';
+  if(s.essay&&s.essay.t)h+='<p class="fine">글: '+esc(s.essay.t)+(s.essay.src?', '+esc(s.essay.src):'')+'</p>';
+  if(s.st!=='done')h+='<p class="fine" style="margin-top:10px">자료를 미리 정하거나 바꿀 때는 Claude가 준 코드를 붙여넣어.</p>'+ovBox(c);
+  if(s.st==='done'){
+    const sc=s.s2!=null?s.s2:s.s1;
+    const rep='공부 보고: '+c.n+'번 '+c.t+' 완료, '+fmtYMD(s.end)+'.'+(sc!=null?' 기말 '+sc+'%.':'')+' 걸린 시간 '+Math.round((s.min||0)/60)+'시간. 한 줄 요약: ';
+    h+='<p class="fine" style="margin-top:10px">보고 상대에게 보낼 문장이야. 요약만 채워서 보내.</p><div class="copyrow"><textarea readonly rows="3" aria-label="보고 문장">'+esc(rep)+'</textarea><button class="btn ghost sm" data-act="copy" data-text="'+esc(rep)+'">복사</button></div>';
+  }
+  return h;
+}
+function renderList(){
+  $('#list').innerHTML=C.map(c=>{
+    const w=statusWord(c);const x=st(c.id).st;
+    const cls=x==='done'?'cs done':(w==='진행 중'||w==='다음 차례')?'cs now':'cs';
+    return '<details class="crow" id="row-'+c.id+'" data-id="'+c.id+'"'+(OPEN.has(c.id)?' open':'')+'><summary><span class="cn">'+c.n+'</span><span class="ct"><b>'+esc(c.t)+'</b><small>'+fieldName(c.f)+', '+MODES[c.m].n+'</small></span><span class="'+cls+'">'+(w||'')+'</span></summary><div class="cbody">'+(OPEN.has(c.id)?detailHTML(c):'')+'</div></details>';
+  }).join('');
+}
+function renderSettings(){
+  $('#minSel').value=String(S.settings.min);
+  document.querySelectorAll('[data-slot]').forEach(inp=>{const i=+inp.dataset.slot;if(document.activeElement!==inp)inp.value=S.settings.slots[i]||'';});
+}
+function render(){renderNow();renderGrid();renderStats();renderFields();renderList();renderSettings();setStoreNote();}
+
+/* ---------- events ---------- */
+document.addEventListener('click',ev=>{
+  const t=ev.target.closest('[data-act]');if(!t)return;
+  const act=t.dataset.act;const c=cur();
+  if(act==='slot'){toggleSlot(+t.dataset.i);return;}
+  if(act==='start'&&c){start(c,null);return;}
+  if(act==='startWith'&&c){const v=Math.round(Number($('#unitsIn').value));if(!(v>=1&&v<=400)){flash('강의 수를 1에서 400 사이로 적어줘.');return;}start(c,v);return;}
+  if(act==='next'){nextSet();return;}
+  if(act==='wrapDone'&&c){const s=stw(c.id);endPhase(c,s);save();render();return;}
+  if(act==='hasExam'&&c){stw(c.id).st='exam';save();render();return;}
+  if(act==='noExam'&&c){stw(c.id).st='map';loadCD(c.id).then(render);save();render();return;}
+  if(act==='score'){submitScore($('#scoreIn').value.trim());return;}
+  if(act==='checkpoint'){checkpoint($('#cpIn').value.trim());return;}
+  if(act==='mapDone'&&c){
+    const v=$('#mapIn').value.trim();if(v.length<20){flash('한 쪽 지도를 조금 더 채워줘.');return;}
+    if(!CD[c.id])CD[c.id]={items:[],map:''};CD[c.id].map=v;saveCD(c.id);
+    const s=stw(c.id);if(c.m==='A'){s.st='essay';}else done(c,s);
+    save();render();return;
+  }
+  if(act==='essayDone'&&c){
+    const tt=$('#essayT').value.trim(),src=$('#essayS').value.trim();
+    if(!tt){flash('글 제목을 적어줘.');return;}
+    const s=stw(c.id);s.essay={t:tt,src:src};done(c,s);save();render();return;
+  }
+  if(act==='endRest'){S.restUntil=null;save();render();return;}
+  if(act==='open'){
+    const id=t.dataset.id;OPEN.add(id);renderList();
+    const row=document.getElementById('row-'+id);
+    if(row)row.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+    return;
+  }
+  if(act==='skip'){
+    const id=t.dataset.id;const s=stw(id);s.st=s.st==='skip'?'todo':'skip';
+    save();render();flash(BY[id].n+'번 '+BY[id].t+(s.st==='skip'?' 뺐어.':' 다시 넣었어.'));return;
+  }
+  if(act==='applyOv'){const id=t.dataset.id;const inp=document.querySelector('[data-ov="'+id+'"]');applyOv(id,inp?inp.value:'');return;}
+  if(act==='export'){exportAll();return;}
+  if(act==='import'){$('#importIn').click();return;}
+  if(act==='copy'){
+    const text=t.dataset.text;
+    const fallback=()=>{const box=t.parentElement.querySelector('input,textarea');if(box){box.focus();box.select();}flash('선택해 뒀어. 길게 눌러 복사해.');};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>flash('복사했어.'),fallback);}else fallback();
+    return;
+  }
+});
+document.addEventListener('toggle',ev=>{
+  const d=ev.target;if(!d.classList||!d.classList.contains('crow'))return;
+  const id=d.dataset.id;
+  if(d.open){OPEN.add(id);const body=d.querySelector('.cbody');if(body&&!body.innerHTML)body.innerHTML=detailHTML(BY[id]);}
+  else OPEN.delete(id);
+},true);
+document.addEventListener('change',ev=>{
+  const t=ev.target;
+  if(t.id==='importIn'){const f=t.files&&t.files[0];if(f)importFile(f).finally(()=>{t.value='';});return;}
+  if(t.dataset&&t.dataset.units){
+    const id=t.dataset.units;const v=Math.round(Number(t.value));
+    if(!(v>=1&&v<=400)){flash('강의 수를 1에서 400 사이로 적어줘.');t.value=units(BY[id])||'';return;}
+    const s=stw(id);s.k=v;s.kv=true;save();render();flash(BY[id].n+'번 강의 수를 '+v+'로 고쳤어.');return;
+  }
+  if(t.id==='minSel'){S.settings.min=Number(t.value);save();render();flash('회차를 '+t.value+'분으로 바꿨어.');return;}
+  if(t.dataset&&t.dataset.slot!=null){S.settings.slots[+t.dataset.slot]=t.value.trim().slice(0,40);save();renderNow();return;}
+});
+let noteTimer=null,mapTimer=null;
+document.addEventListener('input',ev=>{
+  const t=ev.target;const c=cur();if(!c)return;
+  if(t.id==='noteIn'){const s=stw(c.id);if(s.set){s.set.note=t.value.slice(0,300);clearTimeout(noteTimer);noteTimer=setTimeout(save,700);}}
+  if(t.id==='mapIn'){if(!CD[c.id])CD[c.id]={items:[],map:''};CD[c.id].map=t.value.slice(0,4000);clearTimeout(mapTimer);mapTimer=setTimeout(()=>saveCD(c.id),900);}
+});
+/* ---------- boot ---------- */
+$('#subLine').textContent='여덟 분야 '+C.length+'과목을 번호 순서대로, 한 번에 하나씩.';
+$('#mapH').textContent=C.length+'과목 지도';
+S=normalize(lsGet('main'));
+render();setStoreNote();
+{const c=cur();if(c)loadCD(c.id);}
+
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
+}
+if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
+})();
+</script>
+</body>
+</html>
