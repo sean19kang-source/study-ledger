@@ -45,7 +45,8 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;line-height:1.3;margin:0}
 h1{font-size:26px;letter-spacing:-0.01em}
 h2{font-size:20px}
 p{margin:0 0 8px}
-.sub{color:var(--ink-2);margin:4px 0 20px}
+.sub{color:var(--ink-2);margin:4px 0 10px}
+.syncline{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:13px;color:var(--ink-2);margin:0 0 20px;min-height:1.6em}
 .fine{font-size:13px;color:var(--ink-2);margin:4px 0}
 section{margin:0 0 32px}
 :focus-visible{outline:2px solid var(--rose-ink);outline-offset:2px}
@@ -149,6 +150,7 @@ details.fold[open]>summary::after{content:"닫기"}
   <header>
     <h1>10년 공부 기록</h1>
     <p class="sub" id="subLine"></p>
+    <div id="syncLine" class="syncline" aria-live="polite"></div>
   </header>
 
   <section class="slip" aria-labelledby="nowLabel">
@@ -373,31 +375,33 @@ function resourceHTML(b){
   return esc(b.r)+(b.q?' <a href="'+esc(SEARCH(b.q))+'" target="_blank" rel="noopener">찾아보기</a>':'');
 }
 
-/* ---------- storage: this browser only ---------- */
+/* ---------- storage: this device first, account sync when signed in ---------- */
 const LS='ledger1:';
 function lsGet(k){try{const v=localStorage.getItem(LS+k);return v?JSON.parse(v):null;}catch(e){return null;}}
 let warned=false;
 function lsSet(k,v){try{localStorage.setItem(LS+k,JSON.stringify(v));return true;}catch(e){if(!warned){warned=true;flash('기록을 저장하지 못했어. 설정에서 백업 파일을 먼저 받아둬.');}return false;}}
-function save(){S.updatedAt=Date.now();lsSet('main',S);}
-function saveCD(id){const d=CD[id]||{items:[],map:''};lsSet('cd-'+id,{items:d.items||[],map:d.map||''});}
-function loadCD(id){
-  if(!CD[id]){const l=lsGet('cd-'+id);CD[id]={items:(l&&Array.isArray(l.items))?l.items:[],map:(l&&typeof l.map==='string')?l.map:''};}
-  return Promise.resolve(CD[id]);
-}
+function save(){S.updatedAt=Date.now();lsSet('main',S);syncQueueMain();}
+function readCD(id){const l=lsGet('cd-'+id);return {items:(l&&Array.isArray(l.items))?l.items:[],map:(l&&typeof l.map==='string')?l.map:'',updatedAt:(l&&typeof l.updatedAt==='number')?l.updatedAt:0};}
+function saveCD(id){const d=CD[id]||(CD[id]=readCD(id));d.updatedAt=Date.now();lsSet('cd-'+id,{items:d.items||[],map:d.map||'',updatedAt:d.updatedAt});syncQueueCD(id);}
+function loadCD(id){if(!CD[id])CD[id]=readCD(id);return Promise.resolve(CD[id]);}
 function daysSince(x){return Math.floor((parseD(today())-parseD(x))/86400000);}
 function backupDue(){
   const started=Object.values(S.courses).some(x=>x&&x.st&&x.st!=='todo');
   if(!started)return false;
-  return S.lastBackup?daysSince(S.lastBackup)>=30:S.weeks.length>=2;
+  const limit=SY.status==='on'?90:30;
+  return S.lastBackup?daysSince(S.lastBackup)>=limit:S.weeks.length>=2;
 }
 function setStoreNote(){
-  $('#storeNote').textContent='기록은 이 브라우저에만 저장돼. 폰을 바꾸거나 브라우저 데이터를 지우기 전에 설정에서 백업 파일을 받아둬.';
+  $('#storeNote').textContent=SY.status==='on'
+    ?'기록은 이 기기와 네 계정에 함께 저장돼. 로그인한 기기끼리 자동으로 이어져.'
+    :'기록은 지금 이 브라우저에만 저장돼. 로그인하면 네 계정에도 저장되고, 폰을 바꾸기 전엔 백업 파일도 받아둬.';
   const n=$('#backupNote');
   if(n)n.textContent=S.lastBackup?'마지막 백업: '+fmtYMD(S.lastBackup)+'.':'아직 백업 파일을 받은 적이 없어.';
+  renderSync();
 }
 function exportAll(){
   const out={main:S,courses:{}};
-  C.forEach(c=>{const l=lsGet('cd-'+c.id);if(l&&((l.items&&l.items.length)||l.map))out.courses[c.id]={items:l.items||[],map:l.map||''};});
+  C.forEach(c=>{const l=readCD(c.id);if(l.items.length||l.map)out.courses[c.id]={items:l.items,map:l.map};});
   try{
     const blob=new Blob([JSON.stringify(out,null,1)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='10년-공부-기록-백업-'+today()+'.json';
@@ -414,10 +418,148 @@ async function importFile(file){
   S=normalize(data.main);save();
   Object.keys(CD).forEach(k=>{delete CD[k];});
   C.forEach(c=>{try{localStorage.removeItem(LS+'cd-'+c.id);}catch(e){}});
-  Object.entries(data.courses||{}).forEach(([id,v])=>{if(BY[id]&&v)lsSet('cd-'+id,{items:Array.isArray(v.items)?v.items:[],map:typeof v.map==='string'?v.map:''});});
+  Object.entries(data.courses||{}).forEach(([id,v])=>{if(BY[id]&&v){CD[id]={items:Array.isArray(v.items)?v.items:[],map:typeof v.map==='string'?v.map:''};saveCD(id);}});
   const c=cur();if(c)loadCD(c.id);
   render();flash('백업을 불러왔어.');
 }
+
+/* ---------- account sync ----------
+   Each device keeps its own copy. When signed in, every save is pushed to the account,
+   and changes from other devices arrive live. "base" is the account version this device
+   last agreed with, so a device can tell who changed what since then. When both sides
+   changed, progress is merged so no finished work is lost. */
+const SY={fb:null,user:null,status:'loading',err:'',unwatch:null,first:false,base:0,cdBase:{},lastAt:null,gen:0,mainTimer:null,cdTimers:{}};
+function syncKey(k){return k+':'+(SY.user?SY.user.uid:'');}
+function setBase(v){SY.base=v;lsSet(syncKey('syncBase'),v);}
+function setCdBase(id,v){SY.cdBase[id]=v;lsSet(syncKey('cdBase'),SY.cdBase);}
+function hasContent(x){return Object.keys(x.courses||{}).length>0||Object.keys(x.ov||{}).length>0||((x.settings&&x.settings.slots)||[]).some(Boolean);}
+function syncOn(){return SY.status==='on'&&!!SY.fb&&!!SY.user;}
+function syncQueueMain(){if(!syncOn())return;clearTimeout(SY.mainTimer);SY.mainTimer=setTimeout(pushMain,600);}
+function pushMain(){
+  if(!syncOn())return;
+  const snap=clone(S),at=snap.updatedAt,uid=SY.user.uid,gen=SY.gen;
+  // Firestore keeps writes from one device in order, so no queue is needed; results from an older connection are ignored
+  SY.fb.put(uid,'main',snap).then(()=>{if(gen!==SY.gen)return;if(at>SY.base)setBase(at);SY.lastAt=Date.now();renderSync();}).catch(e=>{if(gen===SY.gen)syncFail(e);});
+}
+function syncQueueCD(id){if(!syncOn())return;clearTimeout(SY.cdTimers[id]);SY.cdTimers[id]=setTimeout(()=>pushCD(id),800);}
+function pushCD(id){
+  if(!syncOn())return;
+  const d=CD[id]||readCD(id),uid=SY.user.uid,gen=SY.gen;
+  const data={items:(d.items||[]).slice(),map:d.map||'',updatedAt:d.updatedAt||Date.now()};
+  SY.fb.put(uid,'cd-'+id,clone(data)).then(()=>{if(gen===SY.gen&&data.updatedAt>(SY.cdBase[id]||0))setCdBase(id,data.updatedAt);}).catch(e=>{if(gen===SY.gen)syncFail(e);});
+}
+function syncFail(e){
+  const code=(e&&e.code)||'';
+  if(code==='permission-denied')SY.status='denied';
+  else{SY.status='error';SY.err=code||String((e&&e.message)||e);}
+  setStoreNote();
+}
+const RANK={todo:0,skip:0,run:1,wrap:2,end:3,exam:4,review:5,retry:5,map:6,essay:7,done:8};
+function progressKey(x){const ch=x&&x.set&&Array.isArray(x.set.checks)?x.set.checks.filter(Boolean).length:0;return [RANK[x.st]||0,x.done||0,x.setNo||0,ch,x.min||0];}
+function cmpKey(p,q){for(let i=0;i<p.length;i++){if(p[i]!==q[i])return p[i]-q[i];}return 0;}
+function mergeStates(a,b){
+  const newer=(a.updatedAt||0)>=(b.updatedAt||0)?a:b,older=newer===a?b:a;
+  const out=normalize(clone(newer));
+  new Set([...Object.keys(a.courses||{}),...Object.keys(b.courses||{})]).forEach(id=>{
+    const x=a.courses[id],y=b.courses[id];
+    if(!x){out.courses[id]=clone(y);return;}if(!y){out.courses[id]=clone(x);return;}
+    const c=cmpKey(progressKey(x),progressKey(y));
+    out.courses[id]=clone(c>0?x:c<0?y:(newer===a?x:y));
+  });
+  out.settings.slots=[0,1,2,3].map(i=>newer.settings.slots[i]||older.settings.slots[i]||'');
+  out.weeks=[...new Set([...(a.weeks||[]),...(b.weeks||[])])].sort();
+  out.ov=Object.assign({},older.ov||{},newer.ov||{});
+  out.startedAt=[a.startedAt,b.startedAt].filter(Boolean).sort()[0]||null;
+  out.lastBackup=[a.lastBackup,b.lastBackup].filter(Boolean).sort().pop()||null;
+  return out;
+}
+function handleMain(raw){
+  const cl=normalize(clone(raw));
+  if(cl.updatedAt===S.updatedAt){setBase(cl.updatedAt);return false;}
+  const cloudChanged=cl.updatedAt>SY.base;
+  const localChanged=S.updatedAt>SY.base&&hasContent(S);
+  if(!cloudChanged){if(localChanged)pushMain();return false;}
+  if(!localChanged){S=cl;lsSet('main',S);setBase(cl.updatedAt);return true;}
+  S=mergeStates(S,cl);S.updatedAt=Date.now();lsSet('main',S);pushMain();return true;
+}
+function mapFocused(id){const a=document.activeElement,c=cur();return !!(a&&a.id==='mapIn'&&c&&c.id===id);}
+function handleCD(id,raw){
+  if(!BY[id])return false;
+  const cl={items:Array.isArray(raw.items)?raw.items:[],map:typeof raw.map==='string'?raw.map:'',updatedAt:typeof raw.updatedAt==='number'?raw.updatedAt:0};
+  const lo=CD[id]||readCD(id),lu=lo.updatedAt||0,base=SY.cdBase[id]||0;
+  if(cl.updatedAt===lu){setCdBase(id,lu);return false;}
+  const cloudChanged=cl.updatedAt>base,localChanged=lu>base&&(lo.items.length>0||!!lo.map);
+  if(!cloudChanged){if(localChanged){CD[id]=lo;pushCD(id);}return false;}
+  if(!localChanged){CD[id]=cl;lsSet('cd-'+id,cl);setCdBase(id,cl.updatedAt);return !mapFocused(id);}
+  const key=it=>[it.d,it.k,it.u,it.s,it.x,it.t||''].join('|');const seen=new Set(),items=[];
+  lo.items.concat(cl.items).forEach(it=>{const kk=key(it);if(!seen.has(kk)){seen.add(kk);items.push(it);}});
+  CD[id]={items,map:lu>=cl.updatedAt?lo.map:cl.map,updatedAt:Date.now()};
+  lsSet('cd-'+id,CD[id]);pushCD(id);return !mapFocused(id);
+}
+function stopWatch(){if(SY.unwatch){try{SY.unwatch();}catch(e){}SY.unwatch=null;}}
+function startWatch(){
+  stopWatch();SY.gen++;
+  const uid=SY.user.uid;
+  SY.base=Number(lsGet(syncKey('syncBase')))||0;
+  SY.cdBase=lsGet(syncKey('cdBase'))||{};
+  SY.first=true;SY.status='connecting';setStoreNote();
+  SY.unwatch=SY.fb.watch(uid,changes=>{
+    if(!SY.user||SY.user.uid!==uid)return;
+    const firstRound=SY.first;
+    if(firstRound){SY.first=false;SY.status='on';}
+    const seen=new Set();let dirty=false;
+    changes.forEach(ch=>{
+      seen.add(ch.id);
+      if(ch.pending||ch.type==='removed')return;
+      if(ch.id==='main'){if(handleMain(ch.data))dirty=true;}
+      else if(ch.id.slice(0,3)==='cd-'){if(handleCD(ch.id.slice(3),ch.data))dirty=true;}
+    });
+    if(firstRound){
+      if(!seen.has('main')&&hasContent(S)){if(!S.updatedAt)S.updatedAt=Date.now();lsSet('main',S);pushMain();}
+      C.forEach(c=>{
+        if(seen.has('cd-'+c.id))return;
+        const d=CD[c.id]||readCD(c.id);
+        if(d.items.length||d.map){CD[c.id]=d;if(!d.updatedAt)d.updatedAt=Date.now();pushCD(c.id);}
+      });
+      SY.lastAt=Date.now();
+      flash(dirty?'계정의 기록을 불러왔어.':'계정과 연결됐어.');
+    }else if(dirty){SY.lastAt=Date.now();}
+    if(dirty||firstRound)render();
+  },e=>syncFail(e));
+}
+function onUser(u){
+  if(u){if(SY.user&&SY.user.uid===u.uid&&SY.unwatch)return;SY.user=u;startWatch();}
+  else{stopWatch();SY.gen++;SY.user=null;SY.status=SY.fb?'out':'nofb';setStoreNote();}
+}
+function hhmm(t){const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function renderSync(){
+  const el=$('#syncLine');if(!el)return;
+  const em=SY.user&&SY.user.email?esc(SY.user.email):'이';
+  let h;
+  if(SY.status==='loading')h='<span>동기화 서비스에 연결하는 중이야.</span>';
+  else if(SY.status==='nofb')h='<span>지금은 동기화 서비스에 연결할 수 없어. 기록은 이 기기에 저장되고, 다음에 연결되면 올라가.</span>';
+  else if(SY.status==='out')h='<span>로그인하면 기기 사이에 기록이 이어져.</span><button class="btn ghost sm" data-act="signIn">Google로 로그인</button>';
+  else if(SY.status==='connecting')h='<span>'+em+' 계정에 연결하는 중이야.</span>';
+  else if(SY.status==='on')h='<span>'+em+' 계정과 동기화 중'+(SY.lastAt?', '+hhmm(SY.lastAt)+' 마지막 반영':'')+'.</span><button class="btn ghost sm" data-act="signOut">로그아웃</button>';
+  else if(SY.status==='denied')h='<span>'+em+' 계정은 이 기록을 읽고 쓸 권한이 없어. Firebase 규칙에 적은 이메일이 이 계정과 같은지 확인해 줘.</span><button class="btn ghost sm" data-act="signOut">로그아웃</button>';
+  else h='<span>동기화 중 문제가 생겼어('+esc(SY.err)+'). 기록은 이 기기에 남아 있어.</span><button class="btn ghost sm" data-act="resync">다시 연결</button>';
+  el.innerHTML=h;
+}
+function signIn(btn){
+  if(!SY.fb)return;
+  if(btn)btn.disabled=true;
+  SY.fb.signIn().catch(e=>{
+    const code=(e&&e.code)||'';
+    if(code==='auth/popup-closed-by-user'||code==='auth/cancelled-popup-request')flash('로그인을 취소했어.');
+    else if(code==='auth/unauthorized-domain')flash('이 주소가 Firebase에서 허용되지 않았어. Authentication의 Authorized domains에 sean19kang-source.github.io 를 추가해 줘.');
+    else if(code==='auth/operation-not-allowed')flash('Firebase에서 Google 로그인이 꺼져 있어. Authentication의 Sign-in method에서 Google을 켜줘.');
+    else flash('로그인하지 못했어('+(code||'알 수 없는 오류')+').');
+  }).finally(()=>{renderSync();});
+}
+window.addEventListener('ledger-fb-ready',()=>{if(SY.fb||!window.LEDGER_FB)return;SY.fb=window.LEDGER_FB;SY.fb.onUser(onUser);});
+window.addEventListener('ledger-fb-failed',()=>{if(SY.fb)return;SY.status='nofb';setStoreNote();});
+setTimeout(()=>{if(!SY.fb&&SY.status==='loading'){SY.status='nofb';setStoreNote();}},15000);
+
 function ovBox(c){return '<div class="copyrow"><input data-ov="'+c.id+'" placeholder="Claude가 준 코드 붙여넣기" aria-label="'+esc(c.t)+' 자료 코드"><button class="btn ghost sm" data-act="applyOv" data-id="'+c.id+'">적용</button></div>';}
 function applyOv(id,raw){
   let o=null;try{o=JSON.parse(String(raw).trim());}catch(e){}
@@ -452,7 +594,7 @@ function toggleSlot(i){
   const isLec=set.kind==='run'&&i<set.L;
   if(isLec)s.done=set.base+set.checks.slice(0,set.L).filter(Boolean).length;
   const m=S.settings.min;
-  if(!CD[c.id])CD[c.id]={items:[],map:''};
+  if(!CD[c.id])CD[c.id]=readCD(c.id);
   const items=CD[c.id].items;
   if(on){
     items.push({d:today(),k:isLec?'L':'W',u:isLec?set.base+i+1:null,s:set.no,x:i,m:m});
@@ -465,7 +607,7 @@ function toggleSlot(i){
 function nextSet(){
   const c=cur();if(!c)return;const s=stw(c.id);
   if(s.set&&s.set.note){
-    if(!CD[c.id])CD[c.id]={items:[],map:''};
+    if(!CD[c.id])CD[c.id]=readCD(c.id);
     CD[c.id].items.push({d:today(),k:'N',s:s.set.no,t:s.set.note.slice(0,300)});saveCD(c.id);
   }
   if(s.st==='run'){
@@ -694,7 +836,7 @@ document.addEventListener('click',ev=>{
   if(act==='checkpoint'){checkpoint($('#cpIn').value.trim());return;}
   if(act==='mapDone'&&c){
     const v=$('#mapIn').value.trim();if(v.length<20){flash('한 쪽 지도를 조금 더 채워줘.');return;}
-    if(!CD[c.id])CD[c.id]={items:[],map:''};CD[c.id].map=v;saveCD(c.id);
+    if(!CD[c.id])CD[c.id]=readCD(c.id);CD[c.id].map=v;saveCD(c.id);
     const s=stw(c.id);if(c.m==='A'){s.st='essay';}else done(c,s);
     save();render();return;
   }
@@ -714,6 +856,9 @@ document.addEventListener('click',ev=>{
     const id=t.dataset.id;const s=stw(id);s.st=s.st==='skip'?'todo':'skip';
     save();render();flash(BY[id].n+'번 '+BY[id].t+(s.st==='skip'?' 뺐어.':' 다시 넣었어.'));return;
   }
+  if(act==='signIn'){signIn(t);return;}
+  if(act==='signOut'){if(SY.fb)SY.fb.signOut();return;}
+  if(act==='resync'){if(SY.user&&SY.fb)startWatch();return;}
   if(act==='applyOv'){const id=t.dataset.id;const inp=document.querySelector('[data-ov="'+id+'"]');applyOv(id,inp?inp.value:'');return;}
   if(act==='export'){exportAll();return;}
   if(act==='import'){$('#importIn').click();return;}
@@ -745,7 +890,7 @@ let noteTimer=null,mapTimer=null;
 document.addEventListener('input',ev=>{
   const t=ev.target;const c=cur();if(!c)return;
   if(t.id==='noteIn'){const s=stw(c.id);if(s.set){s.set.note=t.value.slice(0,300);clearTimeout(noteTimer);noteTimer=setTimeout(save,700);}}
-  if(t.id==='mapIn'){if(!CD[c.id])CD[c.id]={items:[],map:''};CD[c.id].map=t.value.slice(0,4000);clearTimeout(mapTimer);mapTimer=setTimeout(()=>saveCD(c.id),900);}
+  if(t.id==='mapIn'){if(!CD[c.id])CD[c.id]=readCD(c.id);CD[c.id].map=t.value.slice(0,4000);clearTimeout(mapTimer);mapTimer=setTimeout(()=>saveCD(c.id),900);}
 });
 /* ---------- boot ---------- */
 $('#subLine').textContent='여덟 분야 '+C.length+'과목을 번호 순서대로, 한 번에 하나씩.';
@@ -759,6 +904,45 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
 }
 if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(()=>{});}
 })();
+</script>
+<script type="module">
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyDIn7gdZVZHWO-LTwlMP2j5PBriBiZFPgs",
+  authDomain:"study-ledger-b2d13.firebaseapp.com",
+  projectId:"study-ledger-b2d13",
+  storageBucket:"study-ledger-b2d13.firebasestorage.app",
+  messagingSenderId:"175602509087",
+  appId:"1:175602509087:web:22a008bc7303f41f92fc2a"
+};
+const BASE='https://www.gstatic.com/firebasejs/10.12.2/';
+try{
+  const [appM,authM,fsM]=await Promise.all([import(BASE+'firebase-app.js'),import(BASE+'firebase-auth.js'),import(BASE+'firebase-firestore.js')]);
+  const app=appM.initializeApp(FIREBASE_CONFIG);
+  const auth=authM.getAuth(app);
+  authM.getRedirectResult(auth).catch(()=>{});
+  const db=fsM.getFirestore(app);
+  const provider=new authM.GoogleAuthProvider();
+  provider.setCustomParameters({prompt:'select_account'});
+  window.LEDGER_FB={
+    onUser:cb=>authM.onAuthStateChanged(auth,u=>cb(u?{uid:u.uid,email:u.email||''}:null)),
+    signIn:async()=>{
+      try{await authM.signInWithPopup(auth,provider);}
+      catch(e){
+        if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment')){await authM.signInWithRedirect(auth,provider);}
+        else throw e;
+      }
+    },
+    signOut:()=>authM.signOut(auth),
+    put:(uid,id,data)=>fsM.setDoc(fsM.doc(db,'users',uid,'ledger',id),data),
+    watch:(uid,next,fail)=>fsM.onSnapshot(fsM.collection(db,'users',uid,'ledger'),snap=>{
+      next(snap.docChanges().map(ch=>({type:ch.type,id:ch.doc.id,data:ch.doc.data(),pending:ch.doc.metadata.hasPendingWrites})));
+    },fail)
+  };
+  window.dispatchEvent(new Event('ledger-fb-ready'));
+}catch(e){
+  window.LEDGER_FB_ERROR=String((e&&e.message)||e);
+  window.dispatchEvent(new Event('ledger-fb-failed'));
+}
 </script>
 </body>
 </html>
