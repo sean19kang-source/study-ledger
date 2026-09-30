@@ -84,6 +84,7 @@ section{margin:0 0 32px}
 .inline{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
 .inline .field{flex:1;min-width:140px}
 .copyrow{display:flex;gap:8px;margin-top:8px;align-items:flex-start}
+.review-note{margin:10px 0 0;font-size:14px;color:var(--rose-ink)}
 .checkin{margin-top:14px;padding-top:12px;border-top:1px dashed var(--rose-ink)}
 .checkin p{font-size:14px;margin:0}
 .copyrow textarea{resize:vertical;line-height:1.5}
@@ -200,7 +201,7 @@ details.fold[open]>summary::after{content:"닫기"}
       <li>훑기: 문제 없이 강의만 듣고, 끝나면 한 쪽 개념 지도를 써.</li>
       <li>공개된 시험이 없는 과목은 한 쪽 개념 지도로 끝내.</li>
       <li>속도 조정 과목은 단원 시험 점수로 주당 강의 수를 바꿔. 80% 이상이면 하나 늘리고, 60% 미만이면 하나 줄여. 범위는 2에서 4.</li>
-      <li>네 칸을 다 채우면 페이지가 만든 점검 문장을 교양 학습 프로젝트의 새 대화에 붙여 Claude와 점검해. 읽기가 있는 주에는 Claude가 읽기 파트너를 맡아.</li><li>과목이 끝나면 지도나 글과 점수를 피드백 요청으로 Claude에게 보내.</li>
+      <li>네 칸을 다 채우면 페이지가 만든 점검 문장을 교양 학습 프로젝트의 새 대화에 붙여 Claude와 점검해. 읽기가 있는 주에는 Claude가 읽기 파트너를 맡아.</li><li>점검 답장 끝에 나온 다시 볼 것은 다음 묶음의 '지난주 점검에서 받은 다시 볼 것' 칸에 적어. 그 주 점검 문장에 자동으로 들어가.</li><li>과목이 끝나면 지도나 글과 점수를 피드백 요청으로 Claude에게 보내.</li>
       <li>과목 도중에 자료를 바꾸지 않아. 도저히 안 맞으면 Claude에게 대체 자료를 물어봐.</li>
       <li>예상 완주가 10년을 넘어도 과목을 빼거나 회차를 억지로 늘리지 않아. 10년 시점은 어디까지 왔는지 보는 점검 지점이야.</li>
     </ol>
@@ -245,7 +246,7 @@ const FIELDS=[
 const MODES={A:{n:'깊게',pace:2,pass:80},B:{n:'표준',pace:3,pass:60},C:{n:'훑기',pace:4,pass:null}};
 const NEED='자료 확정 필요.';
 const C=[
-{id:'c01',t:'사회과학 데이터 분석',f:'경',also:['사'],m:'A',r:'MIT 14.310x, Duflo와 Ellison, 2023',u:'https://ocw.mit.edu/courses/14-310x-data-analysis-for-social-scientists-spring-2023/',k:23,kl:'강',kv:true,ex:'n',est:100,note:'숙제는 손으로 푸는 문항만 풀고, R 코드가 필요한 문항은 건너뛰어. 강의마다 슬라이드 PDF가 있어. 공개 시험이 없어서 한 쪽 개념 지도로 마무리해.',lt:['과정 소개','확률의 기초','확률변수, 분포, 결합분포','데이터 모으기','데이터 요약과 기술','결합·주변·조건부 분포','확률변수의 함수','분포의 적률','기댓값, 분산, 회귀 입문','특수한 분포들','표본평균, 중심극한정리, 추정','추정량의 평가와 도출','신뢰구간, 가설검정, 검정력','인과성','무작위 실험 분석','탐색적 분석, 비모수 비교와 회귀','선형 모형','다변수 모형','회귀분석의 실제 문제들','누락변수 편의','내생성과 도구변수','실험 설계','데이터 시각화'],wk:[{l:4,t:'숙제 2, 손으로 푸는 문항'},{l:6,t:'숙제 3, 손으로 푸는 문항'},{l:9,t:'숙제 4, 손으로 푸는 문항'},{l:11,t:'숙제 5, 손으로 푸는 문항'},{l:13,t:'숙제 6, 손으로 푸는 문항'},{l:16,t:'숙제 7, 손으로 푸는 문항'},{l:18,t:'숙제 8, 손으로 푸는 문항'},{l:20,t:'숙제 9, 손으로 푸는 문항'},{l:22,t:'숙제 10, 손으로 푸는 문항'}],wf:'슬라이드 PDF로 이번 강의 다시 정리'},
+{id:'c01',t:'사회과학 데이터 분석',f:'경',also:['사'],m:'A',r:'MIT 14.310x, Duflo와 Ellison, 2023',u:'https://ocw.mit.edu/courses/14-310x-data-analysis-for-social-scientists-spring-2023/',k:23,kl:'강',kv:true,ex:'n',est:100,note:'숙제는 손으로 푸는 문항만 풀고, R 코드가 필요한 문항은 건너뛰어. 슬라이드는 강좌의 주차별 페이지에서 영상 위 PDF 링크로 열려. 요점 정리는 그 주 강의의 핵심을 네 말로 서너 줄씩 적고 슬라이드 예제를 직접 풀어보는 거야. 공개 시험이 없어서 한 쪽 개념 지도로 마무리해.',lt:['과정 소개','확률의 기초','확률변수, 분포, 결합분포','데이터 모으기','데이터 요약과 기술','결합·주변·조건부 분포','확률변수의 함수','분포의 적률','기댓값, 분산, 회귀 입문','특수한 분포들','표본평균, 중심극한정리, 추정','추정량의 평가와 도출','신뢰구간, 가설검정, 검정력','인과성','무작위 실험 분석','탐색적 분석, 비모수 비교와 회귀','선형 모형','다변수 모형','회귀분석의 실제 문제들','누락변수 편의','내생성과 도구변수','실험 설계','데이터 시각화'],wk:[{l:4,t:'숙제 2, 손으로 푸는 문항'},{l:6,t:'숙제 3, 손으로 푸는 문항'},{l:9,t:'숙제 4, 손으로 푸는 문항'},{l:11,t:'숙제 5, 손으로 푸는 문항'},{l:13,t:'숙제 6, 손으로 푸는 문항'},{l:16,t:'숙제 7, 손으로 푸는 문항'},{l:18,t:'숙제 8, 손으로 푸는 문항'},{l:20,t:'숙제 9, 손으로 푸는 문항'},{l:22,t:'숙제 10, 손으로 푸는 문항'}],wf:'슬라이드 보며 요점 정리'},
 {id:'c02',t:'미적분',f:'수',m:'B',ad:true,r:'MIT 18.01SC, 혼자 공부하는 사람용 판',u:'https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/',k:null,kl:'세션',kv:false,ex:'y',est:120,note:'문제와 해답, 시험과 해답이 다 있어. 단원 시험 점수로 속도를 바꿔.'},
 {id:'c03',t:'사회학개론',f:'사',m:'C',r:null,q:'KOCW 사회학개론 강의',k:null,kl:'강',kv:false,ex:'n',est:30,note:NEED},
 {id:'c04',t:'고전사회이론',f:'사',m:'A',r:'Yale SOCY 151, Szelényi',q:'Open Yale Courses SOCY 151 Foundations of Modern Social Theory',k:null,kl:'강',kv:false,ex:'?',est:100,note:'강의가 다룬 원전 대목을 강의 직후에 읽어.'},
@@ -588,7 +589,7 @@ function applyOv(id,raw){
 }
 
 /* ---------- actions ---------- */
-function newSet(s,kind,L){s.setNo=(s.setNo||0)+1;return {no:s.setNo,base:s.done||0,L:L,kind:kind,checks:[false,false,false,false],note:''};}
+function newSet(s,kind,L){s.setNo=(s.setNo||0)+1;return {no:s.setNo,base:s.done||0,L:L,kind:kind,checks:[false,false,false,false],note:'',review:''};}
 function addWeek(){const w=isoWeek(today());if(!S.weeks.includes(w))S.weeks.push(w);}
 function start(c,k){
   const s=stw(c.id);
@@ -680,7 +681,7 @@ function workLabels(c,set){
   const items=Array.isArray(b.wk)?b.wk.filter(x=>x&&x.l>set.base&&x.l<=set.base+set.L).map(x=>x.t):[];
   if(!items.length)return Array(W).fill(filler);
   if(items.length>=W)return items.slice(0,W-1).concat([items.slice(W-1).join(', ')]);
-  const out=items.slice();out.push('과제 이어서 하고, 남으면 '+filler);
+  const out=items.slice();out.push('숙제 이어서, 끝나면 '+filler);
   while(out.length<W)out.push(filler);
   return out;
 }
@@ -694,15 +695,22 @@ function slotsHTML(c,s){
     h+='<li><button class="slot" role="checkbox" aria-checked="'+(set.checks[i]?'true':'false')+'" data-act="slot" data-i="'+i+'">'+TICK+'<span class="slot-l">'+esc(lab)+'</span>'+plan+'</button></li>';
   }
   h+='</ul>';
-  h+='<label class="field">막힌 곳 한 줄, 적고 싶을 때만<input id="noteIn" maxlength="300" value="'+esc(set.note||'')+'"></label>';
+  if(set.kind==='run'&&set.no>1)h+='<label class="field">지난주 점검에서 받은 다시 볼 것<input id="reviewIn" maxlength="200" placeholder="점검 답장 끝에 나온 한 줄을 적어" value="'+esc(set.review||'')+'"></label>';
+  h+='<label class="field">이번 주 막힌 곳, 있을 때만<input id="noteIn" maxlength="300" placeholder="예: 결합분포에서 주변분포 구하기" value="'+esc(set.note||'')+'"></label>';
   return h;
 }
+function hasPlan(b){return Array.isArray(b.lt)&&b.lt.length>0;}
+function requestText(c){const b=cv(c);return '자료 요청\n과목: '+c.n+'번('+c.id+') '+c.t+', '+MODES[c.m].n+' 방식'+(b.r?'\n정해 둔 자료: '+b.r+(b.u?' '+b.u:''):'')+'\n코드 형식: {"id":"'+c.id+'","r":"자료 이름","u":"링크","k":강의 수,"lt":["강의별 제목"],"wk":[{"l":강 번호,"t":"그 강 뒤에 할 과제"}]}';}
 function modeLine(c){const b=cv(c);return '과목: '+c.n+'번 '+c.t+', '+MODES[c.m].n+' 방식'+(b.r?', '+b.r:'');}
 function checkinText(c,s){
   const set=s.set;const lecs=[];for(let i=0;i<set.L;i++)lecs.push(lecLabel(c,set.base+i+1));
   const works=workLabels(c,set).filter((v,i,a)=>a.indexOf(v)===i);
   const note=(($('#noteIn')&&$('#noteIn').value)||set.note||'').trim();
-  return ['주간 점검',modeLine(c),(cv(c).kl==='편'?'이번 주 읽은 글: ':'이번 주 강의: ')+lecs.join(' / '),'이번 주 과제: '+(works.join(' / ')||'없음'),'막힌 곳: '+(note||'따로 없음')].join('\n');
+  const review=(($('#reviewIn')&&$('#reviewIn').value)||set.review||'').trim();
+  const lines=['주간 점검',modeLine(c),(cv(c).kl==='편'?'이번 주 읽은 글: ':'이번 주 강의: ')+lecs.join(' / '),'이번 주 과제: '+(works.join(' / ')||'없음')];
+  if(review)lines.push('지난주 다시 볼 것: '+review);
+  lines.push('막힌 곳: '+(note||'따로 없음'));
+  return lines.join('\n');
 }
 function wrapText(c,kind){
   const s=st(c.id);const sc=s.s2!=null?s.s2:s.s1;
@@ -728,9 +736,9 @@ function renderNow(){
   if(b.note)h+='<p class="fine">'+esc(b.note)+'</p>';
 
   if(s.st==='todo'){
-    if(!b.r){
-      const ask='자료 요청\n과목: '+c.n+'번('+c.id+') '+c.t+', '+MODES[c.m].n+' 방식\n코드 형식: {"id":"'+c.id+'","r":"자료 이름","u":"링크","k":강의 수,"lt":["강의별 제목"],"wk":[{"l":강 번호,"t":"그 강 뒤에 할 과제"}]}';
-      h+='<p style="margin-top:12px">이 문장을 Claude에게 보내고, 받은 코드를 아래에 붙여넣어.</p><div class="copyrow"><textarea readonly rows="4" aria-label="Claude에게 보낼 문장">'+esc(ask)+'</textarea><button class="btn ghost sm" data-act="copy" data-text="'+esc(ask)+'">복사</button></div>'+ovBox(c);
+    if(!hasPlan(b)){
+      const ask=requestText(c);
+      h+='<p style="margin-top:12px">'+(b.r?'강의 목록과 주별 과제가 아직 없어. ':'자료가 아직 없어. ')+'이 문장을 교양 학습 프로젝트의 새 대화에 보내고, 받은 코드를 아래에 붙여넣어.</p><div class="copyrow"><textarea readonly rows="4" aria-label="Claude에게 보낼 문장">'+esc(ask)+'</textarea><button class="btn ghost sm" data-act="copy" data-text="'+esc(ask)+'">복사</button></div>'+ovBox(c);
     }
     if(!unitsOk(c)){
       h+='<div class="inline"><label class="field">'+esc(b.kl||'강')+' 수, 강의 페이지에서 세서 확인해 줘<input id="unitsIn" type="number" min="1" max="400" inputmode="numeric" value="'+(k||'')+'"></label><button class="btn" data-act="startWith">이 수로 시작</button></div>';
@@ -745,6 +753,7 @@ function renderNow(){
     if(s.st==='review'){title='복습 한 묶음';right='기말 '+s.s1+'%';}
     if(s.st==='retry'){title='복습 한 묶음, 그다음 다른 기출';right='기말 '+s.s1+'%';}
     h+='<div class="week-h"><h3>'+title+'</h3><span>'+right+'</span></div>';
+    if(s.st==='run'&&set.review)h+='<p class="review-note">이번 주에 다시 볼 것: '+esc(set.review)+'</p>';
     h+=slotsHTML(c,s);
     if(s.st==='run'&&all){
       const txt=checkinText(c,s);
@@ -844,7 +853,10 @@ function detailHTML(c){
   if(s.s1!=null)h+='<p class="fine">기말 '+s.s1+'%'+(s.s2!=null?', 다시 본 기출 '+s.s2+'%':'')+'</p>';
   if(s.cps&&s.cps.length)h+='<p class="fine">단원 시험 '+s.cps.map(v=>v+'%').join(', ')+'</p>';
   if(s.essay&&s.essay.t)h+='<p class="fine">글: '+esc(s.essay.t)+(s.essay.src?', '+esc(s.essay.src):'')+'</p>';
-  if(s.st!=='done')h+='<p class="fine" style="margin-top:10px">자료를 미리 정하거나 바꿀 때는 Claude가 준 코드를 붙여넣어.</p>'+ovBox(c);
+  if(s.st!=='done'){
+    if(!hasPlan(b))h+='<p class="fine" style="margin-top:10px">강의 목록과 주별 과제가 아직 없어. 미리 받아두려면 요청 문장을 복사해 새 대화에 보내.</p><div class="acts" style="margin-top:6px"><button class="btn ghost sm" data-act="copyReq" data-id="'+c.id+'">요청 문장 복사</button></div>';
+    h+='<p class="fine" style="margin-top:10px">받은 코드는 여기에 붙여넣어. 자료를 바꿀 때도 같아.</p>'+ovBox(c);
+  }
   if(s.st==='done'){
     const sc=s.s2!=null?s.s2:s.s1;
     const rep='공부 보고: '+c.n+'번 '+c.t+' 완료, '+fmtYMD(s.end)+'.'+(sc!=null?' 기말 '+sc+'%.':'')+' 걸린 시간 '+Math.round((s.min||0)/60)+'시간. 한 줄 요약: ';
@@ -907,6 +919,7 @@ document.addEventListener('click',ev=>{
   if(act==='export'){exportAll();return;}
   if(act==='import'){$('#importIn').click();return;}
   if(act==='copy'){copyText(t.dataset.text,t);return;}
+  if(act==='copyReq'){const cc=BY[t.dataset.id];if(cc)copyText(requestText(cc),t);return;}
   if(act==='copyCheckin'&&c){const s=st(c.id);if(s.set){const txt=checkinText(c,s);const box=$('#checkinTxt');if(box)box.value=txt;copyText(txt,t);}return;}
   if(act==='copyMap'&&c){const v=($('#mapIn').value||'').trim();if(v.length<20){flash('지도를 조금 더 채운 뒤에 복사해 줘.');return;}copyText(wrapText(c,'map'),t);return;}
   if(act==='copyEssay'&&c){if(!($('#essayT').value||'').trim()){flash('글 제목부터 적어줘.');return;}copyText(wrapText(c,'essay'),t);return;}
@@ -926,12 +939,20 @@ document.addEventListener('change',ev=>{
     const s=stw(id);s.k=v;s.kv=true;save();render();flash(BY[id].n+'번 강의 수를 '+v+'로 고쳤어.');return;
   }
   if(t.id==='minSel'){S.settings.min=Number(t.value);save();render();flash('회차를 '+t.value+'분으로 바꿨어.');return;}
+  if(t.id==='reviewIn'){
+    save();
+    const v=t.value.trim();let line=$('#now .review-note');
+    if(v){if(!line){line=document.createElement('p');line.className='review-note';const hd=$('#now .week-h');if(hd)hd.after(line);}line.textContent='이번 주에 다시 볼 것: '+v;}
+    else if(line)line.remove();
+    return;
+  }
   if(t.dataset&&t.dataset.slot!=null){S.settings.slots[+t.dataset.slot]=t.value.trim().slice(0,40);save();renderNow();return;}
 });
 let noteTimer=null,mapTimer=null;
 document.addEventListener('input',ev=>{
   const t=ev.target;const c=cur();if(!c)return;
   if(t.id==='noteIn'){const s=stw(c.id);if(s.set){s.set.note=t.value.slice(0,300);clearTimeout(noteTimer);noteTimer=setTimeout(save,700);const box=$('#checkinTxt');if(box)box.value=checkinText(c,s);}}
+  if(t.id==='reviewIn'){const s=stw(c.id);if(s.set){s.set.review=t.value.slice(0,200);clearTimeout(noteTimer);noteTimer=setTimeout(save,700);const box=$('#checkinTxt');if(box)box.value=checkinText(c,s);}}
   if(t.id==='mapIn'){if(!CD[c.id])CD[c.id]=readCD(c.id);CD[c.id].map=t.value.slice(0,4000);clearTimeout(mapTimer);mapTimer=setTimeout(()=>saveCD(c.id),900);}
 });
 /* ---------- boot ---------- */
